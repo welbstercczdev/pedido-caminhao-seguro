@@ -8,31 +8,31 @@
     
     <!-- PWA: Link para o Manifesto e cor do tema -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#0056b3"> <!-- Cor atualizada para o azul acessível -->
     
     <style>
         body {
             font-family: sans-serif;
             margin: 0;
-            padding: 20px; /* Padding para telas maiores/desktop */
+            padding: 20px;
             background-color: #f4f4f4;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Alinha o container no topo */
+            align-items: flex-start;
             min-height: 100vh;
-            box-sizing: border-box; /* Adicionado para melhor controle de layout */
+            box-sizing: border-box;
         }
 
         .container {
             background-color: #fff;
-            padding: 20px; /* Padding para telas maiores/desktop */
-            border-radius: 8px; /* Para desktop */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Para desktop */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 700px;
-            max-width: 95%; /* Limita a largura em telas médias, antes do breakpoint mobile */
-            margin-top: 20px; /* Para desktop */
-            margin-bottom: 20px; /* Para desktop */
-            box-sizing: border-box; /* Adicionado para melhor controle de layout */
+            max-width: 95%;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -43,8 +43,8 @@
 
         .form-section-title {
             font-size: 1.2em;
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
+            color: #0056b3; /* Cor atualizada para o azul acessível */
+            border-bottom: 2px solid #0056b3; /* Cor atualizada para o azul acessível */
             padding-bottom: 5px;
             margin-top: 25px;
             margin-bottom: 15px;
@@ -87,8 +87,9 @@
             margin-top: 20px;
         }
 
-        .button, .add-button, .remove-button {
-            background-color: #007bff;
+        /* --- CORREÇÕES DE ACESSIBILIDADE --- */
+        .button, .add-button {
+            background-color: #0056b3; /* Azul mais escuro para acessibilidade */
             color: white;
             padding: 10px 15px;
             border: none;
@@ -98,16 +99,46 @@
             transition: background-color 0.3s ease;
             margin-left: 5px;
         }
+        .button:hover, .add-button:hover {
+            background-color: #004494; /* Hover ainda mais escuro */
+        }
         .remove-button {
-            background-color: #dc3545;
+            background-color: #c82333; /* Vermelho mais escuro para acessibilidade */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-left: 5px;
         }
         .remove-button:hover {
-            background-color: #c82333;
+            background-color: #a81d2a; /* Hover ainda mais escuro */
         }
+        .required-asterisk {
+            color: #c82333; /* Vermelho mais escuro para acessibilidade */
+            margin-left: 3px;
+        }
+        .status-message.processing {
+            background-color: #fff3cd;
+            color: #664d03; /* Cor mais escura para contraste */
+            border: 1px solid #ffeeba;
+        }
+        .agente-pill .remove-agente {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333; /* Texto escuro para contraste no fundo cinza */
+        }
+        .agente-pill .remove-agente:hover {
+            color: #000;
+        }
+        small {
+            color: #555; /* Garante que o texto pequeno seja legível */
+        }
+        /* --- FIM DAS CORREÇÕES --- */
 
-        .button:hover, .add-button:hover {
-            background-color: #0056b3;
-        }
 
         .error-message {
             color: red;
@@ -132,11 +163,6 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .status-message.processing {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
 
         .agentes-selecionados-container {
             display: flex;
@@ -156,16 +182,7 @@
             display: flex;
             align-items: center;
         }
-        .agente-pill .remove-agente {
-            margin-left: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #777;
-        }
-        .agente-pill .remove-agente:hover {
-            color: #333;
-        }
-
+        
         #lista-agentes-resultado {
             max-height: 150px;
             overflow-y: auto;
@@ -194,14 +211,9 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-        .required-asterisk {
-            color: red;
-            margin-left: 3px;
-        }
-
-        /* --- Estilos para a lista de materiais (cards) --- */
+        
         #materiais-adicionados {
-            margin-top: 20px; /* Espaçamento acima da lista de cards */
+            margin-top: 20px;
         }
 
         .nenhum-material-mensagem {
@@ -210,7 +222,7 @@
             padding: 15px;
             border: 1px dashed #ddd;
             border-radius: 4px;
-            background-color: #f8f9fa; /* Um fundo sutil */
+            background-color: #f8f9fa;
         }
 
         .material-item-card {
@@ -221,22 +233,17 @@
             margin-bottom: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.07);
             display: flex;
-            flex-direction: column; /* Padrão para mobile: conteúdo e botão empilhados */
-            gap: 10px; /* Espaço entre o bloco de conteúdo e o bloco de ações */
+            flex-direction: column;
+            gap: 10px;
         }
 
         .material-item-card-content {
-            flex-grow: 1; /* Ocupa o espaço disponível */
+            flex-grow: 1;
             display: flex;
-            flex-direction: column; /* Descrição e quantidade empilhadas */
-            gap: 8px; /* Espaço entre descrição e quantidade */
+            flex-direction: column;
+            gap: 8px;
         }
         
-        .material-descricao-container, 
-        .material-quantidade-container {
-             /* No mobile, a largura é gerenciada pelo flex-direction: column do pai */
-        }
-
         .material-descricao-label,
         .material-quantidade-label {
             font-weight: 600;
@@ -268,13 +275,8 @@
             font-size: 0.9em;
         }
 
-
-        /* --- Media Query para Dispositivos Móveis --- */
         @media (max-width: 768px) {
-            body {
-                padding: 0; 
-            }
-
+            body { padding: 0; }
             .container {
                 width: 100%;
                 max-width: 100%; 
@@ -284,53 +286,26 @@
                 box-shadow: none;  
                 min-height: 100vh;
             }
-
-            h1 {
-                font-size: 1.6em; 
-                margin-top: 10px; 
-                margin-bottom: 15px;
-            }
-
-            .form-section-title {
-                font-size: 1.15em;
-            }
-
-            .grid-container {
-                grid-template-columns: 1fr; 
-                gap: 12px; 
-            }
-
-            .button, .add-button, .remove-button {
-                padding: 12px 18px; 
-            }
+            h1 { font-size: 1.6em; margin-top: 10px; margin-bottom: 15px; }
+            .form-section-title { font-size: 1.15em; }
+            .grid-container { grid-template-columns: 1fr; gap: 12px; }
+            .button, .add-button, .remove-button { padding: 12px 18px; }
         }
 
-        /* Para telas um pouco maiores, podemos colocar os itens do card lado a lado */
         @media (min-width: 500px) { 
             .material-item-card {
                 flex-direction: row; 
                 align-items: center; 
                 justify-content: space-between; 
             }
-
             .material-item-card-content {
                 flex-direction: row; 
                 align-items: flex-start; 
                 gap: 20px; 
             }
-
-            .material-descricao-container {
-                flex-grow: 1; 
-            }
-            .material-quantidade-container {
-                min-width: 80px; 
-                text-align: left; 
-            }
-
-            .material-item-actions {
-                align-self: center; 
-                margin-left: 15px; 
-            }
+            .material-descricao-container { flex-grow: 1; }
+            .material-quantidade-container { min-width: 80px; text-align: left; }
+            .material-item-actions { align-self: center; margin-left: 15px; }
         }
     </style>
 </head>
@@ -421,7 +396,6 @@
                     <div id="quadra-error" class="error-message"></div>
                 </div>
             </div>
-
 
             <div class="form-section-title">Seção de Materiais Solicitados<span class="required-asterisk">*</span></div>
             <div class="grid-container">
@@ -540,7 +514,6 @@
         let agentesSelecionados = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            // ---- CÓDIGO PARA REMOVER OPÇÕES DO SELECT DE MATERIAIS ----
             const materialSelect = document.getElementById('descricao_material');
             const optgroupsLabelsToRemove = ["FIXOS (Grupo D)", "NATURAIS (Grupo G)"];
             const optgroups = materialSelect.querySelectorAll('optgroup');
@@ -555,8 +528,7 @@
                     option.remove();
                 }
             });
-            // ---- FIM DO CÓDIGO DE REMOÇÃO DE OPÇÕES ----
-
+            
             const form = document.getElementById('pedido-form');
             const cepInput = document.getElementById('cep');
             const btnAdicionarMaterial = document.getElementById('btn-adicionar-material');
@@ -644,7 +616,6 @@
                 if (validarFormulario()) {
                     mostrarStatus("Processando...", "processing");
                     const pedido = obterDadosDoFormulario();
-                    console.log("Dados do Pedido:", pedido);
                     registrarPedido(pedido);
                 }
             });
@@ -654,12 +625,9 @@
             const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; 
             const buscaAgenteInput = document.getElementById('busca_agente');
             const agentesError = document.getElementById('agentes-error');
-
             buscaAgenteInput.placeholder = "Carregando agentes...";
             buscaAgenteInput.disabled = true;
             agentesError.textContent = "Buscando lista de agentes...";
-
-
             fetch(apiUrl)
                 .then(response => {
                     if (!response.ok) {
@@ -675,7 +643,6 @@
                 })
                 .then(data => {
                     if (data.error) {
-                        console.error('Erro da API de Agentes:', data.error);
                         agentesError.textContent = `Erro ao carregar agentes: ${data.error}.`;
                         buscaAgenteInput.placeholder = "Erro ao carregar agentes";
                         todosAgentes = [];
@@ -684,18 +651,15 @@
                             id: nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), 
                             nome: nome
                         }));
-                        console.log("Agentes carregados:", todosAgentes);
                         agentesError.textContent = ""; 
                         buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
                     } else {
-                        console.error('Formato de dados inesperado da API de Agentes:', data);
                         agentesError.textContent = "Erro: formato de dados inválido dos agentes.";
                         buscaAgenteInput.placeholder = "Erro nos dados dos agentes";
                         todosAgentes = [];
                     }
                 })
                 .catch(error => {
-                    console.error('Erro ao buscar agentes da planilha:', error);
                     agentesError.textContent = `Falha: ${error.message}. Verifique a URL e a implantação do script.`;
                     buscaAgenteInput.placeholder = "Falha ao carregar agentes";
                     todosAgentes = [];
@@ -736,7 +700,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Erro ao buscar CEP:', error);
                     document.getElementById('cep-error').textContent = 'Erro ao buscar CEP.';
                     esconderStatus();
                     limparCamposEndereco(false);
@@ -758,16 +721,13 @@
             const descricaoMaterialError = document.getElementById('descricao_material-error');
             const quantidadeMaterialError = document.getElementById('quantidade_material-error');
             const materiaisListaError = document.getElementById('materiais-error');
-
             descricaoMaterialError.textContent = '';
             quantidadeMaterialError.textContent = '';
             materiaisListaError.textContent = '';
-
             const valorSelecionado = descricaoSelect.value;
             const selectedOptionElement = descricaoSelect.options[descricaoSelect.selectedIndex];
             let descricaoTexto = selectedOptionElement.text;
             const quantidade = parseInt(quantidadeInput.value);
-
             let validMaterial = true;
             if (!valorSelecionado) {
                 descricaoMaterialError.textContent = 'Descrição do material é obrigatória.';
@@ -779,28 +739,21 @@
                 if (validMaterial) quantidadeInput.focus();
                 validMaterial = false;
             }
-
             if (!validMaterial) return;
-
             const optgroup = selectedOptionElement.parentNode;
             let descricaoCompleta = descricaoTexto;
-
             if (optgroup && optgroup.tagName === 'OPTGROUP' && optgroup.label) {
                 descricaoCompleta = `${optgroup.label} - ${descricaoTexto}`;
             }
-
             const containerMateriais = document.getElementById('materiais-adicionados');
             const mensagemNenhumMaterial = containerMateriais.querySelector('.nenhum-material-mensagem');
             if (mensagemNenhumMaterial) {
                 mensagemNenhumMaterial.remove();
             }
-
             const card = document.createElement('div');
             card.classList.add('material-item-card');
-
             const cardContent = document.createElement('div');
             cardContent.classList.add('material-item-card-content');
-
             const descContainer = document.createElement('div');
             descContainer.classList.add('material-descricao-container');
             const descLabel = document.createElement('span');
@@ -811,7 +764,6 @@
             descValor.textContent = descricaoCompleta;
             descContainer.appendChild(descLabel);
             descContainer.appendChild(descValor);
-
             const qtdContainer = document.createElement('div');
             qtdContainer.classList.add('material-quantidade-container');
             const qtdLabel = document.createElement('span');
@@ -822,10 +774,8 @@
             qtdValor.textContent = quantidade;
             qtdContainer.appendChild(qtdLabel);
             qtdContainer.appendChild(qtdValor);
-
             cardContent.appendChild(descContainer);
             cardContent.appendChild(qtdContainer);
-
             const actionsDiv = document.createElement('div');
             actionsDiv.classList.add('material-item-actions');
             const btnRemover = document.createElement('button');
@@ -833,12 +783,9 @@
             btnRemover.textContent = 'Remover';
             btnRemover.classList.add('remove-button', 'remove-material');
             actionsDiv.appendChild(btnRemover);
-
             card.appendChild(cardContent);
             card.appendChild(actionsDiv);
-
             containerMateriais.appendChild(card);
-
             descricaoSelect.selectedIndex = 0;
             quantidadeInput.value = '';
             descricaoSelect.focus();
@@ -850,7 +797,6 @@
             if (cardParaRemover) {
                 cardParaRemover.remove();
             }
-
             const containerMateriais = document.getElementById('materiais-adicionados');
             if (!containerMateriais.querySelector('.material-item-card')) {
                 if (!containerMateriais.querySelector('.nenhum-material-mensagem')) {
@@ -864,13 +810,7 @@
         
         function limparListaMateriais() {
             const containerMateriais = document.getElementById('materiais-adicionados');
-            containerMateriais.innerHTML = ''; 
-
-            const p = document.createElement('p');
-            p.classList.add('nenhum-material-mensagem');
-            p.textContent = 'Nenhum material adicionado.';
-            containerMateriais.appendChild(p);
-
+            containerMateriais.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
             document.getElementById('descricao_material').selectedIndex = 0;
             document.getElementById('quantidade_material').value = '';
         }
@@ -878,7 +818,6 @@
         function selecionarAgente(event) {
             const id = event.target.dataset.id;
             const nome = event.target.dataset.nome;
-            
             if (!agentesSelecionados.find(ag => ag.id === id)) {
                 agentesSelecionados.push({ id, nome });
                 renderizarAgentesSelecionados();
@@ -901,13 +840,11 @@
                 const pill = document.createElement('span');
                 pill.classList.add('agente-pill');
                 pill.textContent = agente.nome;
-                
                 const removeSpan = document.createElement('span');
                 removeSpan.classList.add('remove-agente');
                 removeSpan.textContent = 'x';
                 removeSpan.dataset.id = agente.id;
                 removeSpan.onclick = () => removerAgenteSelecionado(agente.id);
-                
                 pill.appendChild(removeSpan);
                 container.appendChild(pill);
             });
@@ -930,19 +867,14 @@
             cardsMateriais.forEach(card => {
                 const descricaoElement = card.querySelector('.material-descricao-valor');
                 const quantidadeElement = card.querySelector('.material-quantidade-valor');
-                
                 if (descricaoElement && quantidadeElement) {
                     const descricao = descricaoElement.textContent;
                     const quantidade = parseInt(quantidadeElement.textContent);
                     if (descricao && !isNaN(quantidade)) {
-                        materiais.push({
-                            descricao: descricao,
-                            quantidade: quantidade
-                        });
+                        materiais.push({ descricao: descricao, quantidade: quantidade });
                     }
                 }
             });
-
             return {
                 data_pedido: formatarDataParaEnvio(document.getElementById('data_pedido').value),
                 atividade: document.getElementById('atividade').value,
@@ -963,7 +895,6 @@
         function validarFormulario() {
             let isValid = true;
             document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-
             const camposComRequired = [
                 { id: 'data_pedido', errorId: 'data_pedido-error', message: 'Data do pedido é obrigatória.' },
                 { id: 'atividade', errorId: 'atividade-error', message: 'Atividade é obrigatória.' },
@@ -975,105 +906,68 @@
                 { id: 'quadra', errorId: 'quadra-error', message: 'Quadra é obrigatória.' },
                 { id: 'equipe', errorId: 'equipe-error', message: 'Equipe é obrigatória.' }
             ];
-            
             camposComRequired.forEach(campo => {
                 const element = document.getElementById(campo.id);
-                const errorElement = document.getElementById(campo.errorId);
                 if (!element.value.trim()) {
-                    errorElement.textContent = campo.message;
+                    document.getElementById(campo.errorId).textContent = campo.message;
                     isValid = false;
                 }
             });
-
-            const cepInput = document.getElementById('cep');
-            const cep = cepInput.value.replace(/\D/g, '');
-            if (cepInput.value.trim() !== '' && cep.length !== 8) { 
+            const cep = document.getElementById('cep').value.replace(/\D/g, '');
+            if (document.getElementById('cep').value.trim() !== '' && cep.length !== 8) { 
                 document.getElementById('cep-error').textContent = 'CEP inválido. Deve conter 8 dígitos se preenchido.';
                 isValid = false;
             }
-
-            const numeroInput = document.getElementById('numero');
-            if (numeroInput.value && (isNaN(parseInt(numeroInput.value)) || parseInt(numeroInput.value) < 0)) {
-                document.getElementById('numero-error').textContent = 'Número deve ser um valor numérico positivo.';
-                isValid = false;
-            }
-            const areaInput = document.getElementById('area');
-            if (areaInput.value && (isNaN(parseInt(areaInput.value)) || parseInt(areaInput.value) < 0)) {
-                document.getElementById('area-error').textContent = 'Área deve ser um valor numérico positivo.';
-                isValid = false;
-            }
-            const quadraInput = document.getElementById('quadra');
-            if (quadraInput.value && (isNaN(parseInt(quadraInput.value)) || parseInt(quadraInput.value) < 0)) {
-                document.getElementById('quadra-error').textContent = 'Quadra deve ser um valor numérico positivo.';
-                isValid = false;
-            }
-            
-            const containerMateriais = document.getElementById('materiais-adicionados');
-            const cardsMateriais = containerMateriais.querySelectorAll('.material-item-card');
-            if (cardsMateriais.length === 0) {
+            if (document.querySelectorAll('#materiais-adicionados .material-item-card').length === 0) {
                  document.getElementById('materiais-error').textContent = 'Adicione pelo menos um material.';
                  isValid = false;
-            } else {
-                 document.getElementById('materiais-error').textContent = ''; 
             }
-
             if (agentesSelecionados.length === 0) {
                 document.getElementById('agentes-error').textContent = 'Selecione pelo menos um agente.';
                 isValid = false;
             }
-
             return isValid;
         }
 
         function registrarPedido(pedidoData) {
-            const apiUrl =
-                'https://script.google.com/macros/s/AKfycbxMop5yl3K6LcwjOTJ73LAKYwMDreAliZMt6wlbitxhLPOiXsMqf45is4asIWi9C2eH3Q/exec'; 
-
+            const apiUrl = 'https://script.google.com/macros/s/AKfycbxMop5yl3K6LcwjOTJ73LAKYwMDreAliZMt6wlbitxhLPOiXsMqf45is4asIWi9C2eH3Q/exec'; 
             fetch(apiUrl, {
                 method: 'POST',
                 redirect: 'follow', 
-                headers: {
-                     'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(pedidoData).toString(),
             })
             .then(response => {
                 if (!response.ok) { 
-                    return response.text().then(text => { 
-                        throw new Error('Erro de rede ou HTTP: ' + response.statusText + (text ? ' - ' + text : ''));
-                    });
+                    return response.text().then(text => { throw new Error('Erro de rede ou HTTP: ' + response.statusText + (text ? ' - ' + text : '')); });
                 }
                 return response.text(); 
             })
             .then(data => {
-                console.log('Resposta da API:', data);
                 try {
                     const jsonData = JSON.parse(data); 
-                    if (jsonData.status === "success" || jsonData.result === "success") { 
-                         mostrarStatus("Pedido registrado com sucesso!", "success");
-                         document.getElementById('pedido-form').reset();
-                         limparCamposEndereco(true); 
-                         limparListaMateriais();
-                         limparAgentesSelecionados();
-                         document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                    if (jsonData.status === "success" || jsonData.result === "success") {
+                        mostrarStatus("Pedido registrado com sucesso!", "success");
+                        document.getElementById('pedido-form').reset();
+                        limparListaMateriais();
+                        limparAgentesSelecionados();
+                        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
                     } else {
                         throw new Error(jsonData.message || 'Erro no servidor: resposta não esperada.');
                     }
                 } catch (e) {
-                    if (data.trim().toUpperCase() === "OK" || data.includes("success")) { 
-                         mostrarStatus("Pedido registrado com sucesso!", "success");
-                         document.getElementById('pedido-form').reset();
-                         limparCamposEndereco(true); 
-                         limparListaMateriais();
-                         limparAgentesSelecionados();
-                         document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                    if (data.trim().toUpperCase() === "OK" || data.includes("success")) {
+                        mostrarStatus("Pedido registrado com sucesso!", "success");
+                        document.getElementById('pedido-form').reset();
+                        limparListaMateriais();
+                        limparAgentesSelecionados();
+                        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
                     } else {
                         throw new Error('Erro no servidor: ' + data);
                     }
                 }
             })
             .catch(error => {
-                console.error('Erro ao registrar pedido:', error);
                 mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
             });
         }
