@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido de Caminhão</title>
+    
+    <!-- ADICIONADO: Link para o Manifesto e cor do tema -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    
+    <style>
+        /* ... SEU CSS CONTINUA IGUAL AQUI ... */
+    </style>
+</head>
+
+<body>
+    
+    <!-- ... SEU CONTAINER E FORMULÁRIO CONTINUAM IGUAIS AQUI ... -->
+    <div class="container">
+        <!-- ... -->
+    </div>
+
+    <script>
+        /* ... SEU JAVASCRIPT PRINCIPAL CONTINUA IGUAL AQUI ... */
+    </script>
+
+    <!-- ADICIONADO: Script para registrar o Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha ao registrar o Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+
+</body>
+</html>
