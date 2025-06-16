@@ -27,19 +27,20 @@
     </script>
 
     <!-- ADICIONADO: Script para registrar o Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado com sucesso:', registration);
-                    })
-                    .catch(error => {
-                        console.log('Falha ao registrar o Service Worker:', error);
-                    });
-            });
-        }
-    </script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // CORREÇÃO: Remova a barra inicial daqui.
+            navigator.serviceWorker.register('sw.js') 
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                })
+                .catch(error => {
+                    console.log('Falha ao registrar o Service Worker:', error);
+                });
+        });
+    }
+</script>
 
 </body>
 </html>
