@@ -76,53 +76,30 @@
         @media (min-width: 500px) { .material-item-card { flex-direction: row; align-items: center; justify-content: space-between; } .material-item-card-content { flex-direction: row; align-items: flex-start; gap: 20px; } .material-descricao-container { flex-grow: 1; } .material-quantidade-container { min-width: 80px; text-align: left; } .material-item-actions { align-self: center; margin-left: 15px; } }
     </style>
 </head>
-
 <body>
-
     <div id="auth-wrapper" class="auth-container">
         <div class="login-box">
             <div id="login-view">
                 <h2>Acessar Sistema</h2>
-                <form id="login-form">
-                    <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
-                    <div class="form-group"><label for="password">Senha</label><input type="password" id="password" required></div>
-                    <button type="submit" class="button">Entrar</button>
-                    <div id="login-error" class="feedback-message error"></div>
-                </form>
+                <form id="login-form"><div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div><div class="form-group"><label for="password">Senha</label><input type="password" id="password" required></div><button type="submit" class="button">Entrar</button><div id="login-error" class="feedback-message error"></div></form>
                 <div class="forgot-password-link"><a id="forgot-password-link">Esqueci a senha</a></div>
             </div>
             <div id="reset-view" style="display: none;">
                 <h2>Recuperar Senha</h2>
-                <form id="reset-password-form">
-                    <p style="font-size: 0.9em; color: #555; text-align: center;">Digite seu email para receber um link de recuperação.</p>
-                    <div class="form-group"><label for="reset-email">Email</label><input type="email" id="reset-email" required></div>
-                    <button type="submit" class="button">Enviar link</button>
-                    <div id="reset-message" class="feedback-message"></div>
-                </form>
+                <form id="reset-password-form"><p style="font-size: 0.9em; color: #555; text-align: center;">Digite seu email para receber um link de recuperação.</p><div class="form-group"><label for="reset-email">Email</label><input type="email" id="reset-email" required></div><button type="submit" class="button">Enviar link</button><div id="reset-message" class="feedback-message"></div></form>
                 <div class="forgot-password-link"><a id="back-to-login-link">Voltar para o Login</a></div>
             </div>
         </div>
     </div>
-
     <div id="app-container" class="app-wrapper" style="display: none;">
         <div class="container">
             <div class="user-section">
                 <div class="user-info">
                     <div style="flex-grow: 1;"><span id="user-email"></span></div>
-                    <div>
-                        <a id="toggle-password-form" class="password-toggle-link">Alterar Senha</a>
-                        <button id="logout-button" class="remove-button" style="margin-left: 15px;">Sair</button>
-                    </div>
+                    <div><a id="toggle-password-form" class="password-toggle-link">Alterar Senha</a><button id="logout-button" class="remove-button" style="margin-left: 15px;">Sair</button></div>
                 </div>
                 <div class="change-password-form" id="change-password-wrapper" style="display: none;">
-                    <form id="change-password-form">
-                        <label for="new-password">Nova Senha</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="password" id="new-password" placeholder="Digite a nova senha" required style="flex-grow: 1;">
-                            <button type="submit" class="button">Alterar</button>
-                        </div>
-                        <div id="change-password-message" class="feedback-message"></div>
-                    </form>
+                    <form id="change-password-form"><label for="new-password">Nova Senha</label><div style="display: flex; gap: 10px;"><input type="password" id="new-password" placeholder="Digite a nova senha" required style="flex-grow: 1;"><button type="submit" class="button">Alterar</button></div><div id="change-password-message" class="feedback-message"></div></form>
                 </div>
             </div>
             <h1>Pedido de Caminhão</h1>
@@ -326,7 +303,7 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec';
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbzX-i6u2S0AybBjyzlNGAwwamZmeuPV57jmVz82G5zCeLsLyqqzzg8l-1C4HP2NuLP0AQ/exec';
                 const buscaAgenteInput = document.getElementById('busca_agente');
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
@@ -452,7 +429,7 @@
                 user.getIdToken(true).then(function(idToken) {
                     const dataToSend = new URLSearchParams(pedidoData);
                     dataToSend.append('idToken', idToken);
-                    const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec'; 
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbzX-i6u2S0AybBjyzlNGAwwamZmeuPV57jmVz82G5zCeLsLyqqzzg8l-1C4HP2NuLP0AQ/exec'; 
                     fetch(apiUrl, { method: 'POST', body: dataToSend })
                     .then(response => {
                         if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
