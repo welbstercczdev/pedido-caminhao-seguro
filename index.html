@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Política de Segurança de Conteúdo (CSP) para proteção extra -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com/firebasejs/; connect-src 'self' https://viacep.com.br/ https://script.google.com/ https://www.googleapis.com; style-src 'self' 'unsafe-inline';">
+    <!-- Política de Segurança de Conteúdo (CSP) CORRIGIDA -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com/firebasejs/; connect-src 'self' https://viacep.com.br/ https://script.google.com/ https://www.googleapis.com; style-src 'self' 'unsafe-inline';">
     
     <meta name="description" content="Aplicativo para registro e gerenciamento de pedidos de caminhão para atividades de campo de controle de vetores.">
     <title>Pedido de Caminhão</title>
@@ -458,7 +458,7 @@
                     dataToSend.append('idToken', idToken);
 
                     // !!!!!!!!!!!!! IMPORTANTE !!!!!!!!!!!!!
-                    // !!!!!!!!!!!!! COLE SUA NOVA URL AQUI !!!!!!!!!!!!!
+                    // !!!!!!!!!!!!! COLE SUA NOVA URL DO APPS SCRIPT AQUI !!!!!!!!!!!!!
                     const apiUrl = 'https://script.google.com/macros/s/AKfycbwxBy817er6_CqfJkMcvCdUSErTqgyPJdi6hVycVkv6djFPWQ2wrBqVLCzOv2YIR-S6Mg/exec'; 
                     
                     fetch(apiUrl, { method: 'POST', body: dataToSend })
