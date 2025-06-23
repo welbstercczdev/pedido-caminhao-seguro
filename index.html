@@ -81,7 +81,6 @@
 
 <body>
 
-    <!-- Container de Autenticação (Visível por padrão) -->
     <div id="auth-wrapper" class="auth-container">
         <div class="login-box">
             <div id="login-view">
@@ -107,7 +106,6 @@
         </div>
     </div>
 
-    <!-- Container da Aplicação (Escondido por padrão) -->
     <div id="app-container" class="app-wrapper" style="display: none;">
         <div class="container">
             <div class="user-section">
@@ -155,7 +153,6 @@
 
 
     <script>
-        // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCFdMUwG6F27c8VlHLpQy3S8cM_frvQmgU",
             authDomain: "pwa-pedidos.firebaseapp.com",
@@ -167,13 +164,11 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // --- ELEMENTOS GLOBAIS ---
         const authWrapper = document.getElementById('auth-wrapper');
         const appContainer = document.getElementById('app-container');
         const loginView = document.getElementById('login-view');
         const resetView = document.getElementById('reset-view');
 
-        // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('login-form');
             const resetPasswordForm = document.getElementById('reset-password-form');
@@ -230,11 +225,9 @@
             });
         });
 
-        // --- LÓGICA DA APLICAÇÃO PRINCIPAL ---
         function initializeAppLogic(user) {
             if (window.appInitialized) return;
 
-            // Handlers da seção de usuário
             document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
             
             const changePasswordWrapper = document.getElementById('change-password-wrapper');
@@ -260,7 +253,6 @@
                 });
             });
 
-            // Handlers e variáveis do formulário principal
             let todosAgentes = [], agentesSelecionados = [];
             const pedidoForm = document.getElementById('pedido-form');
             const cepInput = document.getElementById('cep');
@@ -303,12 +295,8 @@
                             listaAgentesResultado.appendChild(div);
                         });
                         listaAgentesResultado.classList.remove('hidden');
-                    } else {
-                        listaAgentesResultado.classList.add('hidden');
-                    }
-                } else {
-                    listaAgentesResultado.classList.add('hidden');
-                }
+                    } else { listaAgentesResultado.classList.add('hidden'); }
+                } else { listaAgentesResultado.classList.add('hidden'); }
             });
 
             buscaAgenteInput.addEventListener('focus', function() {
@@ -467,7 +455,8 @@
                 fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
                 .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
                 .then(data => {
-                    if (data.includes("success")) {
+                    const isSuccess = data.includes("success") || data.trim().toUpperCase() === "OK";
+                    if (isSuccess) {
                         mostrarStatus("Pedido registrado com sucesso!", "success");
                         pedidoForm.reset();
                         document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
