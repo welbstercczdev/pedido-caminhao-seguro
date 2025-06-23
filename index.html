@@ -326,7 +326,7 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; // Mesma URL para tudo
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec';
                 const buscaAgenteInput = document.getElementById('busca_agente');
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
@@ -452,7 +452,7 @@
                 user.getIdToken(true).then(function(idToken) {
                     const dataToSend = new URLSearchParams(pedidoData);
                     dataToSend.append('idToken', idToken);
-                    const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec'; 
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbwV92yvabVJojvV6pkwUqMq6XTRzj9Lgxu6S-rcHmo5gKQfvvZ-vEbtg_H7tCcYfDrkiQ/exec'; 
                     fetch(apiUrl, { method: 'POST', body: dataToSend })
                     .then(response => {
                         if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
