@@ -331,25 +331,21 @@
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
 
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ action: 'getAgentes' })
-                })
-                .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
-                .then(data => {
-                    if (data.status === 'error') throw new Error(data.message);
-                    if (data.agentes && Array.isArray(data.agentes)) {
-                        todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
-                        document.getElementById('agentes-error').textContent = ""; 
-                        buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
-                    } else { throw new Error('Formato de dados inesperado.'); }
-                })
-                .catch(error => {
-                    document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
-                    buscaAgenteInput.placeholder = "Falha ao carregar agentes";
-                })
-                .finally(() => { buscaAgenteInput.disabled = false; });
+                fetch(apiUrl)
+                    .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
+                    .then(data => {
+                        if (data.status === 'error') throw new Error(data.message);
+                        if (data.agentes && Array.isArray(data.agentes)) {
+                            todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
+                            document.getElementById('agentes-error').textContent = ""; 
+                            buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
+                        } else { throw new Error('Formato de dados inesperado.'); }
+                    })
+                    .catch(error => {
+                        document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
+                        buscaAgenteInput.placeholder = "Falha ao carregar agentes";
+                    })
+                    .finally(() => { buscaAgenteInput.disabled = false; });
             }
 
             function mostrarStatus(mensagem, tipo = 'info') {
@@ -456,7 +452,7 @@
                 user.getIdToken(true).then(function(idToken) {
                     const dataToSend = new URLSearchParams(pedidoData);
                     dataToSend.append('idToken', idToken);
-                    const apiUrl = 'https://script.google.com/macros/s/AKfycbxFeWCisq6L-WInyjrs0WWxw444rmtdcnUiPT5NoNqRDizn_GUbhnIxYmTPMR5d5nTOhw/exec'; 
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec'; 
                     fetch(apiUrl, { method: 'POST', body: dataToSend })
                     .then(response => {
                         if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
