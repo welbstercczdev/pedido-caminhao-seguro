@@ -1,11 +1,13 @@
-// sw.js - Versão final com lista de cache completa
-const CACHE_NAME = 'pedido-caminhao-cache-v7'; // INCREMENTE A VERSÃO PARA FORÇAR A ATUALIZAÇÃO
+// sw.js - Versão com correção para APIs externas
+// INCREMENTE A VERSÃO DO CACHE PARA FORÇAR A ATUALIZAÇÃO
+const CACHE_NAME = 'pedido-caminhao-cache-v5'; 
 
 const urlsToCache = [
-  './', // Acessa a raiz
+  '/',
+  './',
   'index.html',
   'manifest.json',
-  'favicon.ico', // GARANTE QUE O FAVICON ESTÁ NA LISTA
+  'favicon.ico', // Adicionando o favicon ao cache
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
   'icons/icon-maskable-512x512.png'
@@ -15,13 +17,15 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cache aberto, adicionando App Shell.');
+        console.log('[Service Worker] Cache aberto, adicionando App Shell.');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('[Service Worker] Todos os arquivos foram cacheados com sucesso.');
+        return self.skipWaiting();
+      })
       .catch(error => {
-        // Este log vai nos dizer se algum arquivo ainda está faltando
-        console.error('[SW] Falha ao adicionar arquivos ao cache:', error);
+        console.error('[Service Worker] Falha ao adicionar arquivos ao cache durante a instalação.', error);
       })
   );
 });
@@ -32,30 +36,51 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => Promise.all(
       cacheNames.map(cacheName => {
         if (!cacheWhitelist.includes(cacheName)) {
-          console.log('[SW] Deletando cache antigo:', cacheName);
+          console.log('[Service Worker] Deletando cache antigo:', cacheName);
           return caches.delete(cacheName);
         }
       })
-    )).then(() => self.clients.claim())
+    )).then(() => {
+      console.log('[Service Worker] Cache antigo limpo, ativando novo Service Worker.');
+      return self.clients.claim();
+    })
   );
 });
 
 self.addEventListener('fetch', event => {
-  // Deixa as APIs passarem direto para a rede, sem interferência.
-  if (
-    event.request.url.includes('script.google.com') ||
-    event.request.url.includes('viacep.com.br') ||
-    event.request.url.includes('googleapis.com')
-  ) {
+  // --- CORREÇÃO CRÍTICA ABAIXO ---
+
+  // Se a requisição for para uma API externa, o Service Worker não deve interferir.
+  // A chamada 'return;' faz com que o navegador lide com a requisição normalmente.
+  if (event.request.url.includes('script.google.com') || event.request.url.includes('viacep.com.br')) {
+    // Não use 'event.respondWith()'. Apenas saia e deixe a rede acontecer.
     return;
   }
-  
-  // Para arquivos locais, usa a estratégia Cache-First.
+
+  // Para todas as outras requisições (nossos arquivos locais), use a estratégia "Cache-First".
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Se encontrar no cache, retorna. Senão, busca na rede.
-        return cachedResponse || fetch(event.request);
+        // Se a resposta estiver no cache, retorna ela.
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Se não, busca na rede.
+        return fetch(event.request).then(networkResponse => {
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
+            
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return networkResponse;
+          }
+        );
       })
   );
 });
