@@ -23,22 +23,16 @@
         .container { max-width: 700px; }
         h1, h2 { text-align: center; color: #333; }
         h2 { font-size: 1.5em; margin-top: 0; }
-
         .login-box .form-group { margin-bottom: 15px; }
         .login-box label { display: block; margin-bottom: 5px; font-weight: bold; }
         .login-box input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         .login-box .button { width: 100%; }
-        
-        /* Estilos para a funcionalidade "Esqueci a senha" */
         .forgot-password-link { display: block; text-align: center; margin-top: 15px; }
         .forgot-password-link a, #back-to-login-link { color: #0056b3; text-decoration: none; cursor: pointer; }
         .forgot-password-link a:hover, #back-to-login-link:hover { text-decoration: underline; }
-        
         .feedback-message { font-size: 0.9em; margin-top: 10px; text-align: center; font-weight: bold; min-height: 1.2em; }
         .feedback-message.success { color: #155724; }
         .feedback-message.error { color: #c82333; }
-        
-        /* Estilos da aplicação principal (mantidos) */
         .user-section { background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
         .user-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         #user-email { font-weight: bold; color: #333; word-break: break-all; }
@@ -130,7 +124,158 @@
 
     <!-- Container da Aplicação (escondido) -->
     <div id="app-container" class="app-wrapper" style="display: none;">
-        <!-- Todo o conteúdo da sua aplicação principal vai aqui -->
+        <div class="container">
+            <!-- Seção do Usuário e Logout -->
+            <div class="user-section">
+                <div class="user-info">
+                    <span id="user-email"></span>
+                    <button id="logout-button" class="remove-button">Sair</button>
+                </div>
+                <div class="change-password-form">
+                    <form id="change-password-form">
+                        <label for="new-password">Alterar Senha (recomendado no primeiro acesso)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="password" id="new-password" placeholder="Digite a nova senha" required style="flex-grow: 1;">
+                            <button type="submit" class="button">Alterar</button>
+                        </div>
+                        <div id="change-password-message" class="feedback-message"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SEU FORMULÁRIO ORIGINAL ESTÁ AQUI DENTRO -->
+            <h1>Pedido de Caminhão</h1>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button id="install-button" class="button" style="display: none;">Instalar Aplicativo</button>
+            </div>
+            <form id="pedido-form">
+                <div class="form-group">
+                    <label for="data_pedido">Data do Pedido:<span class="required-asterisk">*</span></label>
+                    <input type="date" id="data_pedido" name="data_pedido" required>
+                    <div id="data_pedido-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="atividade">Atividade:<span class="required-asterisk">*</span></label>
+                    <select id="atividade" name="atividade" required>
+                        <option value="">Selecione...</option>
+                        <option value="CC">CC - Controle de Criadouro</option>
+                        <option value="ADL">ADL - Avaliação de Densidade Larvária</option>
+                        <option value="NEB">NEB - Nebulização</option>
+                        <option value="VIST">VIST - Vistoria</option>
+                        <option value="ARR">ARR - Arrastão</option>
+                        <option value="OUTROS">OUTROS</option>
+                    </select>
+                    <div id="atividade-error" class="error-message"></div>
+                </div>
+                <div class="form-section-title">Endereço da Atividade</div>
+                <div class="grid-container">
+                    <div class="form-group">
+                        <label for="cep">CEP:</label>
+                        <input type="text" id="cep" name="cep" placeholder="00000-000">
+                        <div id="cep-error" class="error-message"></div>
+                        <small>Ao sair do campo, o sistema tentará buscar o endereço.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="endereco">Endereço:<span class="required-asterisk">*</span></label>
+                        <input type="text" id="endereco" name="endereco" required>
+                        <div id="endereco-error" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="form-group">
+                        <label for="numero">Número:<span class="required-asterisk">*</span></label>
+                        <input type="number" id="numero" name="numero" required>
+                        <div id="numero-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="complemento">Complemento:</label>
+                        <input type="text" id="complemento" name="complemento">
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="form-group">
+                        <label for="bairro">Bairro:<span class="required-asterisk">*</span></label>
+                        <input type="text" id="bairro" name="bairro" required>
+                        <div id="bairro-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regiao">Região:<span class="required-asterisk">*</span></label>
+                        <select id="regiao" name="regiao" required>
+                            <option value="">Selecione...</option>
+                            <option value="NORTE">NORTE</option>
+                            <option value="SUL">SUL</option>
+                            <option value="LESTE">LESTE</option>
+                            <option value="OESTE">OESTE</option>
+                            <option value="CENTRO">CENTRO</option>
+                            <option value="SUDESTE">SUDESTE</option>
+                        </select>
+                        <div id="regiao-error" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="form-group">
+                        <label for="area">Área:<span class="required-asterisk">*</span></label>
+                        <input type="number" id="area" name="area" required>
+                        <div id="area-error" class="error-message"></div>
+                    </div>
+                     <div class="form-group">
+                        <label for="quadra">Quadra:<span class="required-asterisk">*</span></label>
+                        <input type="number" id="quadra" name="quadra" required>
+                        <div id="quadra-error" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="form-section-title">Seção de Materiais Solicitados<span class="required-asterisk">*</span></div>
+                <div class="grid-container">
+                    <div class="form-group">
+                        <label for="descricao_material">Descrição do Material:<span class="required-asterisk">*</span></label>
+                        <select name="descricao_material" id="descricao_material">
+                            <option value="">-- Selecione uma opção --</option>
+                            <optgroup label="DEPÓSITO ELEVADO (Grupo A)"><option value="A2">Não ligado a rede</option></optgroup>
+                            <optgroup label="DEPÓSITO NÃO ELEVADO (Grupo B)"><option value="B4">Não ligado a rede</option></optgroup>
+                            <optgroup label="MÓVEIS (Grupo C)"><option value="C5">Vaso de planta na água</option><option value="C6">Vaso de planta (diversos)</option><option value="C7">Prato/Pingadeira</option><option value="C8">Consumo animal</option><option value="C9">Depósito para construção</option><option value="C10">Depósito para horticultura</option><option value="C11">Piscina desmontável</option><option value="C12">Lata, Frasco, Plástico utilizáveis</option><option value="C13">Garrafas retornáveis</option><option value="C14">Balde/Regador</option><option value="C15">Bandeja geladeira/Ar condicionado</option><option value="C16">Material de construção</option><option value="C17">Outros (Móveis)</option></optgroup>
+                            <optgroup label="PNEUS (Grupo E)"><option value="E28">Pneus</option><option value="E29">Outros correlatos (Pneus)</option></optgroup>
+                            <optgroup label="PASSÍVEIS REMOÇÃO/ALTERAÇÃO (Grupo F)"><option value="F30">Lata, Frasco, Plástico</option><option value="F31">Garrafas descartáveis</option><option value="F32">Lona, Encerado, Plástico</option><option value="F33">Entulho de construção</option><option value="F34">Peças/Sucatas</option><option value="F35">Masseira</option><option value="F36">Barco</option><option value="F37">Outros (Passíveis Remoção)</option></optgroup>
+                        </select>
+                        <div id="descricao_material-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade_material">Quantidade:<span class="required-asterisk">*</span></label>
+                        <input type="number" id="quantidade_material" name="quantidade_material" min="1">
+                        <div id="quantidade_material-error" class="error-message"></div>
+                    </div>
+                </div>
+                <button type="button" class="add-button" id="btn-adicionar-material">Adicionar Material</button>
+                <div id="materiais-error" class="error-message"></div> 
+                <div id="materiais-adicionados"><p class="nenhum-material-mensagem">Nenhum material adicionado.</p></div>
+                <div class="form-section-title">Equipe</div>
+                <div class="form-group" style="position: relative;">
+                    <label for="agentes">Agente(s):<span class="required-asterisk">*</span></label>
+                    <div class="agentes-selecionados-container" id="agentes-selecionados-container"></div>
+                    <input type="search" id="busca_agente" placeholder="Buscando agentes...">
+                    <div id="lista-agentes-resultado" class="hidden"></div>
+                    <div id="agentes-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="equipe">Equipe:<span class="required-asterisk">*</span></label>
+                    <select id="equipe" name="equipe" required>
+                        <option value="">Selecione...</option>
+                        <option value="CCZ-NEB1">CCZ-NEB1</option>
+                        <option value="CCZ-NEB2">CCZ-NEB2</option>
+                        <option value="CCZ-NEB3">CCZ-NEB3</option>
+                        <option value="CCZ-NEB4">CCZ-NEB4</option>
+                        <option value="SÃO JUDAS">SÃO JUDAS</option>
+                        <option value="VL MARIA">VL MARIA</option>
+                        <option value="VL NAIR">VL NAIR</option>
+                        <option value="JD SATÉLITE">JD SATÉLITE</option>
+                    </select>
+                    <div id="equipe-error" class="error-message"></div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="button">Registrar Atividade</button>
+                </div>
+                <div id="status-area" class="status-message"></div>
+            </form>
+        </div>
     </div>
 
 
@@ -148,126 +293,91 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
+        // --- ELEMENTOS GLOBAIS ---
         const authWrapper = document.getElementById('auth-wrapper');
         const appContainer = document.getElementById('app-container');
-        
-        // Views de autenticação
         const loginView = document.getElementById('login-view');
         const resetView = document.getElementById('reset-view');
 
-        // Formulários e links
-        const loginForm = document.getElementById('login-form');
-        const resetPasswordForm = document.getElementById('reset-password-form');
-        const forgotPasswordLink = document.getElementById('forgot-password-link');
-        const backToLoginLink = document.getElementById('back-to-login-link');
-        
-        // Mensagens de feedback
-        const loginError = document.getElementById('login-error');
-        const resetMessage = document.getElementById('reset-message');
+        // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const resetPasswordForm = document.getElementById('reset-password-form');
+            const forgotPasswordLink = document.getElementById('forgot-password-link');
+            const backToLoginLink = document.getElementById('back-to-login-link');
+            const loginError = document.getElementById('login-error');
+            const resetMessage = document.getElementById('reset-message');
 
-        // Função para alternar entre as telas de login e reset
-        function toggleAuthView(show) {
-            if (show === 'login') {
-                loginView.style.display = 'block';
-                resetView.style.display = 'none';
-            } else {
-                loginView.style.display = 'none';
-                resetView.style.display = 'block';
+            function toggleAuthView(show) {
+                loginView.style.display = (show === 'login') ? 'block' : 'none';
+                resetView.style.display = (show === 'reset') ? 'block' : 'none';
             }
-        }
 
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleAuthView('reset');
-        });
+            forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthView('reset'); });
+            backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthView('login'); });
 
-        backToLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleAuthView('login');
-        });
-
-        // Observador de estado de autenticação
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                authWrapper.style.display = 'none';
-                appContainer.style.display = 'flex';
-                // Move o HTML da aplicação para dentro do container quando logado
-                if (!appContainer.querySelector('.container')) {
-                    appContainer.innerHTML = document.getElementById('app-content-template').innerHTML;
-                }
-                const userEmailSpan = document.getElementById('user-email');
-                userEmailSpan.textContent = `Logado como: ${user.email}`;
-                initializeAppLogic();
-            } else {
-                authWrapper.style.display = 'flex';
-                appContainer.style.display = 'none';
-            }
-        });
-
-        // Handler do formulário de login
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = loginForm.email.value;
-            const password = loginForm.password.value;
-            loginError.textContent = '';
-            auth.signInWithEmailAndPassword(email, password).catch(error => {
-                loginError.textContent = 'Email ou senha inválidos.';
-            });
-        });
-        
-        // Handler do formulário de recuperação de senha
-        resetPasswordForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = resetPasswordForm['reset-email'].value;
-            resetMessage.textContent = '';
-            resetMessage.className = 'feedback-message';
-
-            auth.sendPasswordResetEmail(email)
-                .then(() => {
-                    resetMessage.textContent = 'Se este email estiver cadastrado, um link de recuperação foi enviado. Verifique sua caixa de entrada e spam.';
-                    resetMessage.classList.add('success');
-                })
-                .catch((error) => {
-                    console.error("Erro no reset de senha:", error);
-                    // Por segurança, mostramos a mesma mensagem de sucesso para não revelar quais emails existem.
-                    resetMessage.textContent = 'Se este email estiver cadastrado, um link de recuperação foi enviado. Verifique sua caixa de entrada e spam.';
-                    resetMessage.classList.add('success');
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = loginForm.email.value;
+                const password = loginForm.password.value;
+                loginError.textContent = '';
+                auth.signInWithEmailAndPassword(email, password).catch(error => {
+                    loginError.textContent = 'Email ou senha inválidos.';
                 });
+            });
+
+            resetPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = resetPasswordForm['reset-email'].value;
+                resetMessage.className = 'feedback-message';
+                resetMessage.textContent = '';
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        resetMessage.textContent = 'Link de recuperação enviado. Verifique seu email.';
+                        resetMessage.classList.add('success');
+                    })
+                    .catch((error) => {
+                        resetMessage.textContent = 'Link de recuperação enviado. Verifique seu email.';
+                        resetMessage.classList.add('success');
+                    });
+            });
+
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    authWrapper.style.display = 'none';
+                    appContainer.style.display = 'flex';
+                    document.getElementById('user-email').textContent = `Logado como: ${user.email}`;
+                    initializeAppLogic(user);
+                } else {
+                    authWrapper.style.display = 'flex';
+                    appContainer.style.display = 'none';
+                }
+            });
         });
 
         // --- LÓGICA DA APLICAÇÃO PRINCIPAL ---
-        // As funções abaixo só são chamadas e configuradas após o login bem-sucedido
-        function initializeAppLogic() {
+        function initializeAppLogic(user) {
             if (window.appInitialized) return;
 
-            const logoutButton = document.getElementById('logout-button');
-            const changePasswordForm = document.getElementById('change-password-form');
-            
-            logoutButton.addEventListener('click', () => auth.signOut());
-
-            changePasswordForm.addEventListener('submit', (e) => {
+            // Handlers da seção de usuário
+            document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
+            document.getElementById('change-password-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const newPassword = document.getElementById('new-password').value;
+                const newPasswordInput = document.getElementById('new-password');
                 const changePasswordMessage = document.getElementById('change-password-message');
-                const user = auth.currentUser;
-
-                changePasswordMessage.textContent = '';
                 changePasswordMessage.className = 'feedback-message';
-
-                if (user && newPassword) {
-                    user.updatePassword(newPassword).then(() => {
-                        changePasswordMessage.textContent = 'Senha alterada com sucesso!';
-                        changePasswordMessage.classList.add('success');
-                        document.getElementById('new-password').value = '';
-                    }).catch((error) => {
-                        changePasswordMessage.textContent = 'Erro ao alterar a senha. Faça logout e login novamente.';
-                        changePasswordMessage.classList.add('error');
-                    });
-                }
+                changePasswordMessage.textContent = '';
+                user.updatePassword(newPasswordInput.value).then(() => {
+                    changePasswordMessage.textContent = 'Senha alterada com sucesso!';
+                    changePasswordMessage.classList.add('success');
+                    newPasswordInput.value = '';
+                }).catch(error => {
+                    changePasswordMessage.textContent = 'Erro ao alterar a senha.';
+                    changePasswordMessage.classList.add('error');
+                });
             });
-            
-            // Seu código de formulário original...
+
+            // Handlers e variáveis do formulário principal
             let todosAgentes = [], agentesSelecionados = [];
             const pedidoForm = document.getElementById('pedido-form');
             const cepInput = document.getElementById('cep');
@@ -281,24 +391,14 @@
             btnAdicionarMaterial.addEventListener('click', adicionarMaterialNaLista);
             document.getElementById('materiais-adicionados').addEventListener('click', function(e) { /* ... */ });
             buscaAgenteInput.addEventListener('input', function() { /* ... */ });
-            buscaAgenteInput.addEventListener('focus', function() { /* ... */ });
-            document.addEventListener('click', function(event) { /* ... */ });
-            pedidoForm.addEventListener('submit', function(event) { /* ... */ });
+            //... e o restante dos seus event listeners
             
             window.appInitialized = true;
             
+            // Definição de todas as suas funções de formulário (carregarAgentesDaPlanilha, etc.)
             function carregarAgentesDaPlanilha() { /* ... */ }
-            function mostrarStatus(mensagem, tipo = 'info') { /* ... */ }
-            function buscarCep(cep) { /* ... */ }
-            // E todas as outras funções do seu formulário...
+            // ... e as outras
         }
-    </script>
-    
-    <!-- Template do Conteúdo da Aplicação -->
-    <script type="text/template" id="app-content-template">
-        <div class="container">
-            <!-- Coloque o conteúdo do seu app-container aqui -->
-        </div>
     </script>
 
     <!-- PWA Scripts -->
@@ -309,18 +409,21 @@
             });
         }
         let deferredPrompt;
-        const installButton = document.getElementById('install-button');
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if(installButton) installButton.style.display = 'block';
-            installButton?.addEventListener('click', () => {
-                installButton.style.display = 'none';
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-            });
+            const installButton = document.getElementById('install-button');
+            if(installButton) {
+                installButton.style.display = 'block';
+                installButton.addEventListener('click', () => {
+                    installButton.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+                });
+            }
         });
         window.addEventListener('appinstalled', () => {
+            const installButton = document.getElementById('install-button');
             if(installButton) installButton.style.display = 'none';
             deferredPrompt = null;
         });
