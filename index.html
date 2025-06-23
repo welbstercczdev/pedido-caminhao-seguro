@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Política de Segurança de Conteúdo (CSP) para proteção extra -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com/firebasejs/; connect-src 'self' https://viacep.com.br/ https://script.google.com/ https://www.googleapis.com; style-src 'self' 'unsafe-inline';">
+    
     <meta name="description" content="Aplicativo para registro e gerenciamento de pedidos de caminhão para atividades de campo de controle de vetores.">
     <title>Pedido de Caminhão</title>
     
@@ -281,16 +284,11 @@
                 const termoBusca = this.value.toLowerCase();
                 listaAgentesResultado.innerHTML = '';
                 if (termoBusca.length > 0 && todosAgentes.length > 0) {
-                    const filtrados = todosAgentes.filter(agente => 
-                        agente.nome.toLowerCase().includes(termoBusca) &&
-                        !agentesSelecionados.find(sel => sel.id === agente.id)
-                    );
+                    const filtrados = todosAgentes.filter(agente => agente.nome.toLowerCase().includes(termoBusca) && !agentesSelecionados.find(sel => sel.id === agente.id));
                     if (filtrados.length > 0) {
                         filtrados.forEach(agente => {
                             const div = document.createElement('div');
-                            div.textContent = agente.nome;
-                            div.dataset.id = agente.id;
-                            div.dataset.nome = agente.nome;
+                            div.textContent = agente.nome; div.dataset.id = agente.id; div.dataset.nome = agente.nome;
                             div.addEventListener('click', selecionarAgente);
                             listaAgentesResultado.appendChild(div);
                         });
@@ -308,9 +306,7 @@
                      const naoSelecionados = todosAgentes.filter(agente => !agentesSelecionados.find(sel => sel.id === agente.id));
                      naoSelecionados.forEach(agente => {
                         const div = document.createElement('div');
-                        div.textContent = agente.nome;
-                        div.dataset.id = agente.id;
-                        div.dataset.nome = agente.nome;
+                        div.textContent = agente.nome; div.dataset.id = agente.id; div.dataset.nome = agente.nome;
                         div.addEventListener('click', selecionarAgente);
                         listaAgentesResultado.appendChild(div);
                     });
@@ -451,19 +447,43 @@
             }
 
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbxMop5yl3K6LcwjOTJ73LAKYwMDreAliZMt6wlbitxhLPOiXsMqf45is4asIWi9C2eH3Q/exec'; 
-                fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
-                .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
-                .then(data => {
-                    const isSuccess = data.includes("success") || data.trim().toUpperCase() === "OK";
-                    if (isSuccess) {
-                        mostrarStatus("Pedido registrado com sucesso!", "success");
-                        pedidoForm.reset();
-                        document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
-                        agentesSelecionados = []; renderizarAgentesSelecionados();
-                    } else { throw new Error('Erro no servidor: ' + data); }
-                })
-                .catch(error => { mostrarStatus('Erro ao registrar pedido: ' + error.message, "error"); });
+                const user = auth.currentUser;
+                if (!user) {
+                    mostrarStatus('Erro: Usuário não está logado. Por favor, faça login novamente.', 'error');
+                    return;
+                }
+
+                user.getIdToken(true).then(function(idToken) {
+                    const dataToSend = new URLSearchParams(pedidoData);
+                    dataToSend.append('idToken', idToken);
+
+                    // !!!!!!!!!!!!! IMPORTANTE !!!!!!!!!!!!!
+                    // !!!!!!!!!!!!! COLE SUA NOVA URL AQUI !!!!!!!!!!!!!
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbwxBy817er6_CqfJkMcvCdUSErTqgyPJdi6hVycVkv6djFPWQ2wrBqVLCzOv2YIR-S6Mg/exec'; 
+                    
+                    fetch(apiUrl, { method: 'POST', body: dataToSend })
+                    .then(response => {
+                        if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
+                        return response.text();
+                    })
+                    .then(data => {
+                        const isSuccess = data.trim().toUpperCase() === "OK";
+                        if (isSuccess) {
+                            mostrarStatus("Pedido registrado com sucesso!", "success");
+                            pedidoForm.reset();
+                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            agentesSelecionados = []; renderizarAgentesSelecionados();
+                        } else {
+                            throw new Error('Resposta inesperada do servidor: ' + data);
+                        }
+                    })
+                    .catch(error => {
+                        mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
+                    });
+
+                }).catch(function(error) {
+                    mostrarStatus('Erro de autenticação. Não foi possível obter o token.', 'error');
+                });
             }
         }
     </script>
@@ -471,10 +491,22 @@
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e; const installButton = document.getElementById('install-button');
-            if(installButton) { installButton.style.display = 'block'; installButton.addEventListener('click', () => { installButton.style.display = 'none'; deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); }); }
+            e.preventDefault(); deferredPrompt = e;
+            const installButton = document.getElementById('install-button');
+            if(installButton) {
+                installButton.style.display = 'block';
+                installButton.addEventListener('click', () => {
+                    installButton.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+                });
+            }
         });
-        window.addEventListener('appinstalled', () => { const installButton = document.getElementById('install-button'); if(installButton) installButton.style.display = 'none'; deferredPrompt = null; });
+        window.addEventListener('appinstalled', () => {
+            const installButton = document.getElementById('install-button');
+            if(installButton) installButton.style.display = 'none';
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
