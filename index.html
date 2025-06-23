@@ -4,17 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com/firebasejs/; connect-src 'self' https://viacep.com.br/ https://script.google.com/ https://script.googleusercontent.com/ https://www.googleapis.com https://securetoken.googleapis.com; style-src 'self' 'unsafe-inline';">
     <meta name="description" content="Aplicativo para registro e gerenciamento de pedidos de caminhão para atividades de campo de controle de vetores.">
     <title>Pedido de Caminhão</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0056b3">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
         .auth-container, .app-wrapper { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; box-sizing: border-box; }
@@ -281,16 +279,11 @@
                 const termoBusca = this.value.toLowerCase();
                 listaAgentesResultado.innerHTML = '';
                 if (termoBusca.length > 0 && todosAgentes.length > 0) {
-                    const filtrados = todosAgentes.filter(agente => 
-                        agente.nome.toLowerCase().includes(termoBusca) &&
-                        !agentesSelecionados.find(sel => sel.id === agente.id)
-                    );
+                    const filtrados = todosAgentes.filter(agente => agente.nome.toLowerCase().includes(termoBusca) && !agentesSelecionados.find(sel => sel.id === agente.id));
                     if (filtrados.length > 0) {
                         filtrados.forEach(agente => {
                             const div = document.createElement('div');
-                            div.textContent = agente.nome;
-                            div.dataset.id = agente.id;
-                            div.dataset.nome = agente.nome;
+                            div.textContent = agente.nome; div.dataset.id = agente.id; div.dataset.nome = agente.nome;
                             div.addEventListener('click', selecionarAgente);
                             listaAgentesResultado.appendChild(div);
                         });
@@ -308,9 +301,7 @@
                      const naoSelecionados = todosAgentes.filter(agente => !agentesSelecionados.find(sel => sel.id === agente.id));
                      naoSelecionados.forEach(agente => {
                         const div = document.createElement('div');
-                        div.textContent = agente.nome;
-                        div.dataset.id = agente.id;
-                        div.dataset.nome = agente.nome;
+                        div.textContent = agente.nome; div.dataset.id = agente.id; div.dataset.nome = agente.nome;
                         div.addEventListener('click', selecionarAgente);
                         listaAgentesResultado.appendChild(div);
                     });
@@ -335,13 +326,15 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec';
+                const buscaAgenteInput = document.getElementById('busca_agente');
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
+
                 fetch(apiUrl)
                     .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
                     .then(data => {
-                        if (data.error) throw new Error(`Erro da API de Agentes: ${data.error}`);
+                        if (data.status === 'error') throw new Error(data.message);
                         if (data.agentes && Array.isArray(data.agentes)) {
                             todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
                             document.getElementById('agentes-error').textContent = ""; 
@@ -404,7 +397,7 @@
             function removerMaterialDaLista(botao) {
                 botao.closest('.material-item-card')?.remove();
                 const container = document.getElementById('materiais-adicionados');
-                if (container.children.length === 0) { container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>'; }
+                if (!container.querySelector('.material-item-card')) { container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>'; }
             }
             
             function selecionarAgente(event) {
@@ -451,19 +444,38 @@
             }
 
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbziR4lWWF55lbo4NtFpJxpC9pntRgDp-HT0aVcn2uejk2fzSBtN3BlztbjeBZJYxoYUrw/exec'; 
-                fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
-                .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
-                .then(data => {
-                    const isSuccess = data.includes("success") || data.trim().toUpperCase() === "OK";
-                    if (isSuccess) {
-                        mostrarStatus("Pedido registrado com sucesso!", "success");
-                        pedidoForm.reset();
-                        document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
-                        agentesSelecionados = []; renderizarAgentesSelecionados();
-                    } else { throw new Error('Erro no servidor: ' + data); }
-                })
-                .catch(error => { mostrarStatus('Erro ao registrar pedido: ' + error.message, "error"); });
+                const user = auth.currentUser;
+                if (!user) {
+                    mostrarStatus('Erro: Usuário não está logado. Por favor, faça login novamente.', 'error');
+                    return;
+                }
+                user.getIdToken(true).then(function(idToken) {
+                    const dataToSend = new URLSearchParams(pedidoData);
+                    dataToSend.append('idToken', idToken);
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbzKD8malMEIJyTZaOSk1EThnWUmhqqonSHG2PANCGBuFlNEinykMyU5YLKYDgllhpaAcg/exec'; 
+                    fetch(apiUrl, { method: 'POST', body: dataToSend })
+                    .then(response => {
+                        if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
+                        return response.text();
+                    })
+                    .then(data => {
+                        const isSuccess = data.trim().toUpperCase() === "OK";
+                        if (isSuccess) {
+                            mostrarStatus("Pedido registrado com sucesso!", "success");
+                            pedidoForm.reset();
+                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            agentesSelecionados = []; renderizarAgentesSelecionados();
+                        } else {
+                            throw new Error('Resposta inesperada do servidor: ' + data);
+                        }
+                    })
+                    .catch(error => {
+                        mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
+                    });
+
+                }).catch(function(error) {
+                    mostrarStatus('Erro de autenticação. Não foi possível obter o token.', 'error');
+                });
             }
         }
     </script>
@@ -471,10 +483,22 @@
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e; const installButton = document.getElementById('install-button');
-            if(installButton) { installButton.style.display = 'block'; installButton.addEventListener('click', () => { installButton.style.display = 'none'; deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); }); }
+            e.preventDefault(); deferredPrompt = e;
+            const installButton = document.getElementById('install-button');
+            if(installButton) {
+                installButton.style.display = 'block';
+                installButton.addEventListener('click', () => {
+                    installButton.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+                });
+            }
         });
-        window.addEventListener('appinstalled', () => { const installButton = document.getElementById('install-button'); if(installButton) installButton.style.display = 'none'; deferredPrompt = null; });
+        window.addEventListener('appinstalled', () => {
+            const installButton = document.getElementById('install-button');
+            if(installButton) installButton.style.display = 'none';
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
