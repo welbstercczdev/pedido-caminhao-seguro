@@ -1,11 +1,11 @@
 // sw.js - Versão final com lista de cache completa
-const CACHE_NAME = 'pedido-caminhao-cache-v6'; // INCREMENTE A VERSÃO
+const CACHE_NAME = 'pedido-caminhao-cache-v7'; // INCREMENTE A VERSÃO PARA FORÇAR A ATUALIZAÇÃO
 
 const urlsToCache = [
   './', // Acessa a raiz
   'index.html',
   'manifest.json',
-  'favicon.ico',
+  'favicon.ico', // GARANTE QUE O FAVICON ESTÁ NA LISTA
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
   'icons/icon-maskable-512x512.png'
@@ -20,6 +20,7 @@ self.addEventListener('install', event => {
       })
       .then(() => self.skipWaiting())
       .catch(error => {
+        // Este log vai nos dizer se algum arquivo ainda está faltando
         console.error('[SW] Falha ao adicionar arquivos ao cache:', error);
       })
   );
@@ -53,10 +54,8 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(event.request);
+        // Se encontrar no cache, retorna. Senão, busca na rede.
+        return cachedResponse || fetch(event.request);
       })
   );
 });
