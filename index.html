@@ -12,7 +12,6 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
@@ -36,6 +35,8 @@
         .user-section { background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
         .user-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         #user-email { font-weight: bold; color: #333; word-break: break-all; }
+        .password-toggle-link { color: #0056b3; cursor: pointer; font-size: 0.9em; text-decoration: none; }
+        .password-toggle-link:hover { text-decoration: underline; }
         .change-password-form { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; }
         .container { align-self: flex-start; }
         .form-section-title { font-size: 1.2em; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; }
@@ -111,12 +112,15 @@
         <div class="container">
             <div class="user-section">
                 <div class="user-info">
-                    <span id="user-email"></span>
-                    <button id="logout-button" class="remove-button">Sair</button>
+                    <div style="flex-grow: 1;"><span id="user-email"></span></div>
+                    <div>
+                        <a id="toggle-password-form" class="password-toggle-link">Alterar Senha</a>
+                        <button id="logout-button" class="remove-button" style="margin-left: 15px;">Sair</button>
+                    </div>
                 </div>
-                <div class="change-password-form">
+                <div class="change-password-form" id="change-password-wrapper" style="display: none;">
                     <form id="change-password-form">
-                        <label for="new-password">Alterar Senha (recomendado no primeiro acesso)</label>
+                        <label for="new-password">Nova Senha</label>
                         <div style="display: flex; gap: 10px;">
                             <input type="password" id="new-password" placeholder="Digite a nova senha" required style="flex-grow: 1;">
                             <button type="submit" class="button">Alterar</button>
@@ -151,6 +155,7 @@
 
 
     <script>
+        // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCFdMUwG6F27c8VlHLpQy3S8cM_frvQmgU",
             authDomain: "pwa-pedidos.firebaseapp.com",
@@ -162,11 +167,13 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // --- ELEMENTOS GLOBAIS ---
         const authWrapper = document.getElementById('auth-wrapper');
         const appContainer = document.getElementById('app-container');
         const loginView = document.getElementById('login-view');
         const resetView = document.getElementById('reset-view');
 
+        // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('login-form');
             const resetPasswordForm = document.getElementById('reset-password-form');
@@ -218,15 +225,25 @@
                 } else {
                     authWrapper.style.display = 'flex';
                     appContainer.style.display = 'none';
-                    window.appInitialized = false; // Reseta o flag no logout
+                    window.appInitialized = false;
                 }
             });
         });
 
+        // --- LÓGICA DA APLICAÇÃO PRINCIPAL ---
         function initializeAppLogic(user) {
             if (window.appInitialized) return;
 
+            // Handlers da seção de usuário
             document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
+            
+            const changePasswordWrapper = document.getElementById('change-password-wrapper');
+            document.getElementById('toggle-password-form').addEventListener('click', (e) => {
+                e.preventDefault();
+                const isHidden = changePasswordWrapper.style.display === 'none';
+                changePasswordWrapper.style.display = isHidden ? 'block' : 'none';
+            });
+            
             document.getElementById('change-password-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newPasswordInput = document.getElementById('new-password');
@@ -243,6 +260,7 @@
                 });
             });
 
+            // Handlers e variáveis do formulário principal
             let todosAgentes = [], agentesSelecionados = [];
             const pedidoForm = document.getElementById('pedido-form');
             const cepInput = document.getElementById('cep');
@@ -333,27 +351,20 @@
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
                 fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-                        return response.json();
-                    })
+                    .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
                     .then(data => {
                         if (data.error) throw new Error(`Erro da API de Agentes: ${data.error}`);
                         if (data.agentes && Array.isArray(data.agentes)) {
                             todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
                             document.getElementById('agentes-error').textContent = ""; 
                             buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
-                        } else {
-                            throw new Error('Formato de dados inesperado da API de Agentes.');
-                        }
+                        } else { throw new Error('Formato de dados inesperado.'); }
                     })
                     .catch(error => {
-                        document.getElementById('agentes-error').textContent = `Falha ao carregar agentes: ${error.message}`;
+                        document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
                         buscaAgenteInput.placeholder = "Falha ao carregar agentes";
                     })
-                    .finally(() => {
-                        buscaAgenteInput.disabled = false;
-                    });
+                    .finally(() => { buscaAgenteInput.disabled = false; });
             }
 
             function mostrarStatus(mensagem, tipo = 'info') {
@@ -370,9 +381,8 @@
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('status-area').style.display = 'none';
-                        if (data.erro) {
-                            document.getElementById('cep-error').textContent = 'CEP não encontrado.';
-                        } else {
+                        if (data.erro) { document.getElementById('cep-error').textContent = 'CEP não encontrado.'; } 
+                        else {
                             document.getElementById('endereco').value = data.logradouro || '';
                             document.getElementById('bairro').value = data.bairro || '';
                             document.getElementById('cep-error').textContent = '';
@@ -386,38 +396,27 @@
             }
 
             function adicionarMaterialNaLista() {
-                const descricaoSelect = document.getElementById('descricao_material');
-                const quantidadeInput = document.getElementById('quantidade_material');
-                let validMaterial = true;
-                if (!descricaoSelect.value) {
-                    document.getElementById('descricao_material-error').textContent = 'Descrição é obrigatória.';
-                    validMaterial = false;
-                }
-                if (isNaN(parseInt(quantidadeInput.value)) || parseInt(quantidadeInput.value) < 1) {
-                    document.getElementById('quantidade_material-error').textContent = 'Quantidade inválida.';
-                    validMaterial = false;
-                }
-                if (!validMaterial) return;
-                const selectedOption = descricaoSelect.options[descricaoSelect.selectedIndex];
-                const optgroup = selectedOption.parentNode;
-                const descricaoCompleta = (optgroup && optgroup.label) ? `${optgroup.label} - ${selectedOption.text}` : selectedOption.text;
-                const containerMateriais = document.getElementById('materiais-adicionados');
-                containerMateriais.querySelector('.nenhum-material-mensagem')?.remove();
-                const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${descricaoCompleta}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${parseInt(quantidadeInput.value)}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
-                containerMateriais.insertAdjacentHTML('beforeend', cardHTML);
-                descricaoSelect.value = '';
-                quantidadeInput.value = '';
+                const descSelect = document.getElementById('descricao_material');
+                const qtdInput = document.getElementById('quantidade_material');
+                let valid = true;
+                if (!descSelect.value) { document.getElementById('descricao_material-error').textContent = 'Obrigatório.'; valid = false; }
+                if (isNaN(parseInt(qtdInput.value)) || parseInt(qtdInput.value) < 1) { document.getElementById('quantidade_material-error').textContent = 'Inválido.'; valid = false; }
+                if (!valid) return;
+                const opt = descSelect.options[descSelect.selectedIndex];
+                const desc = (opt.parentNode.label) ? `${opt.parentNode.label} - ${opt.text}` : opt.text;
+                const container = document.getElementById('materiais-adicionados');
+                container.querySelector('.nenhum-material-mensagem')?.remove();
+                const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${desc}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${parseInt(qtdInput.value)}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+                descSelect.value = ''; qtdInput.value = '';
                 document.getElementById('descricao_material-error').textContent = '';
                 document.getElementById('quantidade_material-error').textContent = '';
             }
 
-            function removerMaterialDaLista(botaoRemover) {
-                const card = botaoRemover.closest('.material-item-card');
-                card?.remove();
+            function removerMaterialDaLista(botao) {
+                botao.closest('.material-item-card')?.remove();
                 const container = document.getElementById('materiais-adicionados');
-                if (container.children.length === 0) {
-                    container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
-                }
+                if (container.children.length === 0) { container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>'; }
             }
             
             function selecionarAgente(event) {
