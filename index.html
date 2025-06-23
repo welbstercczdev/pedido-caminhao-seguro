@@ -4,20 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Política de Segurança de Conteúdo (CSP) FINAL E CORRIGIDA -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com/firebasejs/; connect-src 'self' https://viacep.com.br/ https://script.google.com/ https://script.googleusercontent.com/ https://www.googleapis.com https://securetoken.googleapis.com; style-src 'self' 'unsafe-inline';">
-    
     <meta name="description" content="Aplicativo para registro e gerenciamento de pedidos de caminhão para atividades de campo de controle de vetores.">
     <title>Pedido de Caminhão</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0056b3">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
         .auth-container, .app-wrapper { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; box-sizing: border-box; }
@@ -331,24 +326,30 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; 
+                const apiUrl = 'SUA_URL_DO_APPS_SCRIPT_AQUI'; // Mesma URL para tudo
+                const buscaAgenteInput = document.getElementById('busca_agente');
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
-                fetch(apiUrl)
-                    .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
-                    .then(data => {
-                        if (data.error) throw new Error(`Erro da API de Agentes: ${data.error}`);
-                        if (data.agentes && Array.isArray(data.agentes)) {
-                            todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
-                            document.getElementById('agentes-error').textContent = ""; 
-                            buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
-                        } else { throw new Error('Formato de dados inesperado.'); }
-                    })
-                    .catch(error => {
-                        document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
-                        buscaAgenteInput.placeholder = "Falha ao carregar agentes";
-                    })
-                    .finally(() => { buscaAgenteInput.disabled = false; });
+
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'getAgentes' })
+                })
+                .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
+                .then(data => {
+                    if (data.status === 'error') throw new Error(data.message);
+                    if (data.agentes && Array.isArray(data.agentes)) {
+                        todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
+                        document.getElementById('agentes-error').textContent = ""; 
+                        buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
+                    } else { throw new Error('Formato de dados inesperado.'); }
+                })
+                .catch(error => {
+                    document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
+                    buscaAgenteInput.placeholder = "Falha ao carregar agentes";
+                })
+                .finally(() => { buscaAgenteInput.disabled = false; });
             }
 
             function mostrarStatus(mensagem, tipo = 'info') {
@@ -452,15 +453,10 @@
                     mostrarStatus('Erro: Usuário não está logado. Por favor, faça login novamente.', 'error');
                     return;
                 }
-
                 user.getIdToken(true).then(function(idToken) {
                     const dataToSend = new URLSearchParams(pedidoData);
                     dataToSend.append('idToken', idToken);
-
-                    // !!!!!!!!!!!!! IMPORTANTE !!!!!!!!!!!!!
-                    // !!!!!!!!!!!!! COLE SUA NOVA URL DO APPS SCRIPT AQUI !!!!!!!!!!!!!
-                    const apiUrl = 'https://script.google.com/macros/s/AKfycbyZHsuCHr00eUmMtki2gaPwnmewo-D4sceSIW-VnRqyn2-cwv4nmghf6Ccr2MoZWW9-DQ/exec'; 
-                    
+                    const apiUrl = 'https://script.google.com/macros/s/AKfycbxFeWCisq6L-WInyjrs0WWxw444rmtdcnUiPT5NoNqRDizn_GUbhnIxYmTPMR5d5nTOhw/exec'; 
                     fetch(apiUrl, { method: 'POST', body: dataToSend })
                     .then(response => {
                         if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erro de rede.'); }); }
