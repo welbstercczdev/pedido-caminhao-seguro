@@ -456,7 +456,7 @@
             }
 
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbwrJHikwjqWFA8EAqnBDcsrOogbVvUK7FhpJ0xDxU41o4-9ArNi8lK-iExvbPkxU9fjfA/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbyoRSf_Bi3F3an5zAmZnoVEIFD8FQoCBpIG2D0vaoHdQ8krOLWDQn4SvQP0bSDTFA4/exec'; 
                 fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
                 .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
                 .then(data => {
