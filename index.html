@@ -338,7 +338,7 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbzt6xK0aXcqxcyJ9_eu8wJCGZapRIpOTjPSskMpwwe39FIHDVxMMd5qp6Bj5fzC7JpAqg/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; 
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
                 fetch(apiUrl)
@@ -456,7 +456,7 @@
             }
 
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbyCrvRc-sBu2uHnjwesYhAmYfQAO-q8ygKpbqqK9rzgJ9RX6wL3mMnTdOUPmtvOEo_f/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwrJHikwjqWFA8EAqnBDcsrOogbVvUK7FhpJ0xDxU41o4-9ArNi8lK-iExvbPkxU9fjfA/exec'; 
                 fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
                 .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
                 .then(data => {
