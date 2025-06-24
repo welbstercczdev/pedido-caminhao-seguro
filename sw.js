@@ -1,18 +1,19 @@
 // sw.js - Versão com correção para APIs externas
 // INCREMENTE A VERSÃO DO CACHE PARA FORÇAR A ATUALIZAÇÃO
-const CACHE_NAME = 'pedido-caminhao-cache-v5'; 
+// sw.js - Versão 6, com config.js
+const CACHE_NAME = 'pedido-caminhao-cache-v6'; 
 
 const urlsToCache = [
   '/',
   './',
   'index.html',
   'manifest.json',
-  'favicon.ico', // Adicionando o favicon ao cache
+  'favicon.ico',
+  'config.js', // <-- ARQUIVO ADICIONADO AO CACHE
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
   'icons/icon-maskable-512x512.png'
 ];
-
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
