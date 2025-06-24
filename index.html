@@ -151,7 +151,6 @@
         </div>
     </div>
 
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCFdMUwG6F27c8VlHLpQy3S8cM_frvQmgU",
@@ -295,8 +294,12 @@
                             listaAgentesResultado.appendChild(div);
                         });
                         listaAgentesResultado.classList.remove('hidden');
-                    } else { listaAgentesResultado.classList.add('hidden'); }
-                } else { listaAgentesResultado.classList.add('hidden'); }
+                    } else {
+                        listaAgentesResultado.classList.add('hidden');
+                    }
+                } else {
+                    listaAgentesResultado.classList.add('hidden');
+                }
             });
 
             buscaAgenteInput.addEventListener('focus', function() {
@@ -335,7 +338,7 @@
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbz2ARfFFzrRAgeq_gGfZSZ4lIOkPXOd5LOHGQpFRoSdgq65uGE4T3MTzZ2aetl_cYZUuA/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbxW6jY3ukmN0SifIiC6TR4BACI_i-wmkvO6rkK2oDIFR6BW64tY5mCwuyrazOr0SgTS/exec'; 
                 buscaAgenteInput.placeholder = "Carregando agentes...";
                 buscaAgenteInput.disabled = true;
                 fetch(apiUrl)
@@ -387,6 +390,8 @@
                 const descSelect = document.getElementById('descricao_material');
                 const qtdInput = document.getElementById('quantidade_material');
                 let valid = true;
+                document.getElementById('descricao_material-error').textContent = '';
+                document.getElementById('quantidade_material-error').textContent = '';
                 if (!descSelect.value) { document.getElementById('descricao_material-error').textContent = 'Obrigatório.'; valid = false; }
                 if (isNaN(parseInt(qtdInput.value)) || parseInt(qtdInput.value) < 1) { document.getElementById('quantidade_material-error').textContent = 'Inválido.'; valid = false; }
                 if (!valid) return;
@@ -397,8 +402,6 @@
                 const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${desc}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${parseInt(qtdInput.value)}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
                 container.insertAdjacentHTML('beforeend', cardHTML);
                 descSelect.value = ''; qtdInput.value = '';
-                document.getElementById('descricao_material-error').textContent = '';
-                document.getElementById('quantidade_material-error').textContent = '';
             }
 
             function removerMaterialDaLista(botao) {
@@ -439,6 +442,7 @@
             function obterDadosDoFormulario() {
                 const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({ descricao: card.querySelector('.material-descricao-valor').textContent, quantidade: parseInt(card.querySelector('.material-quantidade-valor').textContent) }));
                 const [year, month, day] = document.getElementById('data_pedido').value.split('-');
+                const usuarioLogado = auth.currentUser;
                 return {
                     data_pedido: `${day}/${month}/${year}`,
                     atividade: document.getElementById('atividade').value, cep: document.getElementById('cep').value,
@@ -446,12 +450,13 @@
                     complemento: document.getElementById('complemento').value, bairro: document.getElementById('bairro').value,
                     regiao: document.getElementById('regiao').value, area: document.getElementById('area').value,
                     quadra: document.getElementById('quadra').value, materiais_solicitados: JSON.stringify(materiais),
-                    agentes: JSON.stringify(agentesSelecionados.map(a => a.nome)), equipe: document.getElementById('equipe').value
+                    agentes: JSON.stringify(agentesSelecionados.map(a => a.nome)), equipe: document.getElementById('equipe').value,
+                    usuario_logado: usuarioLogado ? usuarioLogado.email : 'N/A'
                 };
             }
 
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbz88PwE5l8g1kJnQ69bGGMCquB3mn4C8KfauqAS0tXEoiBmKfbsBqlw-BOXQGwdszxjrQ/exec'; 
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwrJHikwjqWFA8EAqnBDcsrOogbVvUK7FhpJ0xDxU41o4-9ArNi8lK-iExvbPkxU9fjfA/exec'; 
                 fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
                 .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
                 .then(data => {
@@ -471,7 +476,8 @@
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e; const installButton = document.getElementById('install-button');
+            e.preventDefault(); deferredPrompt = e;
+            const installButton = document.getElementById('install-button');
             if(installButton) { installButton.style.display = 'block'; installButton.addEventListener('click', () => { installButton.style.display = 'none'; deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); }); }
         });
         window.addEventListener('appinstalled', () => { const installButton = document.getElementById('install-button'); if(installButton) installButton.style.display = 'none'; deferredPrompt = null; });
