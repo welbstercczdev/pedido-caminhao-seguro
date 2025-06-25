@@ -1,15 +1,16 @@
-// sw.js - Versão com correção para APIs externas
-const CACHE_NAME = 'pedido-caminhao-cache-v6'; // Versão do cache incrementada para forçar atualização
+// sw.js - Versão com correção de cache e tratamento de APIs externas
+const CACHE_NAME = 'pedido-caminhao-cache-v7'; // Versão incrementada para forçar a atualização
 
+// Lista de arquivos essenciais para o App Shell.
+// Garanta que todos esses arquivos existem nos caminhos corretos no seu repositório.
 const urlsToCache = [
-  '/',
-  './',
+  './', // Representa o index.html no diretório atual
   'index.html',
   'manifest.json',
   'favicon.ico',
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png',
-  'icons/icon-maskable-512x512.png'
+  'icons/icon-512x512.png'
+  // Removido 'icon-maskable' se não existir, para evitar erro. Adicione de volta se o arquivo existir.
 ];
 
 self.addEventListener('install', event => {
@@ -17,10 +18,22 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('[Service Worker] Cache aberto, adicionando App Shell.');
-        return cache.addAll(urlsToCache);
+        // fetch() cada recurso e adiciona ao cache um por um para melhor depuração
+        const promises = urlsToCache.map(url => {
+          return fetch(url)
+            .then(response => {
+              if (!response.ok) {
+                throw new TypeError(`[Service Worker] Falha ao buscar ${url}: ${response.statusText}`);
+              }
+              return cache.put(url, response);
+            })
+            .catch(err => {
+              console.error(`[Service Worker] Não foi possível cachear ${url}.`, err);
+            });
+        });
+        return Promise.all(promises);
       })
       .then(() => self.skipWaiting())
-      .catch(error => console.error('[Service Worker] Falha ao cachear arquivos durante a instalação.', error))
   );
 });
 
@@ -41,26 +54,16 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
 
-  // CORREÇÃO: Não intercepta chamadas para APIs externas.
-  // O navegador irá lidar com elas normalmente (acessando a rede).
+  // Não intercepta chamadas para APIs externas.
   if (requestUrl.hostname === 'script.google.com' || requestUrl.hostname === 'viacep.com.br') {
     return; // Deixa a requisição passar direto para a rede
   }
 
-  // Para todas as outras requisições (arquivos locais do app), usa a estratégia "Cache-First".
+  // Estratégia "Cache-First" para os arquivos do próprio app
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Se a resposta estiver no cache, retorna ela.
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // Se não, busca na rede.
-        return fetch(event.request).catch(error => {
-          console.log('[Service Worker] Fetch falhou; o usuário provavelmente está offline.', error);
-          // Você pode retornar uma página offline padrão aqui se quiser
-        });
+        return cachedResponse || fetch(event.request);
       })
   );
 });
