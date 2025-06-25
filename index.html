@@ -129,7 +129,7 @@
             </div>
             <h1>Pedido de Caminhão</h1>
             <div style="text-align: center; margin-bottom: 20px;"><button id="install-button" class="button" style="display: none;">Instalar Aplicativo</button></div>
-            <form id="pedido-form">
+            <form id="pedido-form" onsubmit="event.preventDefault();">
                 <div class="form-group"><label for="data_pedido">Data do Pedido:<span class="required-asterisk">*</span></label><input type="date" id="data_pedido" name="data_pedido" required><div id="data_pedido-error" class="error-message"></div></div>
                 <div class="form-group"><label for="atividade">Atividade:<span class="required-asterisk">*</span></label><select id="atividade" name="atividade" required><option value="">Selecione...</option><option value="CC">CC - Controle de Criadouro</option><option value="ADL">ADL - Avaliação de Densidade Larvária</option><option value="NEB">NEB - Nebulização</option><option value="VIST">VIST - Vistoria</option><option value="ARR">ARR - Arrastão</option><option value="OUTROS">OUTROS</option></select><div id="atividade-error" class="error-message"></div></div>
                 <div class="form-section-title">Endereço da Atividade</div>
@@ -145,7 +145,7 @@
                 <div class="form-section-title">Equipe</div>
                 <div class="form-group" style="position: relative;"><label for="agentes">Agente(s):<span class="required-asterisk">*</span></label><div class="agentes-selecionados-container" id="agentes-selecionados-container"></div><input type="search" id="busca_agente" placeholder="Buscando agentes..."><div id="lista-agentes-resultado" class="hidden"></div><div id="agentes-error" class="error-message"></div></div>
                 <div class="form-group"><label for="equipe">Equipe:<span class="required-asterisk">*</span></label><select id="equipe" name="equipe" required><option value="">Selecione...</option><option value="CCZ-NEB1">CCZ-NEB1</option><option value="CCZ-NEB2">CCZ-NEB2</option><option value="CCZ-NEB3">CCZ-NEB3</option><option value="CCZ-NEB4">CCZ-NEB4</option><option value="SÃO JUDAS">SÃO JUDAS</option><option value="VL MARIA">VL MARIA</option><option value="VL NAIR">VL NAIR</option><option value="JD SATÉLITE">JD SATÉLITE</option></select><div id="equipe-error" class="error-message"></div></div>
-                <div class="button-group"><button type="submit" class="button">Registrar Atividade</button></div>
+                <div class="button-group"><button type="submit" id="submit-button" class="button">Registrar Atividade</button></div>
                 <div id="status-area" class="status-message"></div>
             </form>
         </div>
@@ -156,7 +156,7 @@
             apiKey: "AIzaSyCSSQIrxWMc9FyQTtpjENP_hhpAXIamSyw",
             authDomain: "pwa-pedidos-seguro.firebaseapp.com",
             projectId: "pwa-pedidos-seguro",
-            storageBucket: "pwa-pedidos-seguro.firebasestorage.app",
+            storageBucket: "pwa-pedidos-seguro.appspot.com",
             messagingSenderId: "188774063096",
             appId: "1:188774063096:web:51ffeac39fbcbd01e7940d"
         };
@@ -327,7 +327,7 @@
                 }
             });
 
-            pedidoForm.addEventListener('submit', function(event) {
+            document.getElementById('submit-button').addEventListener('click', function(event) {
                 event.preventDefault();
                 if (validarFormulario()) {
                     mostrarStatus("Processando...", "processing");
@@ -419,8 +419,8 @@
                     listaAgentesResultado.classList.add('hidden');
                 }
             }
-
-            function removerAgenteSelecionado(idAgente) {
+            
+            window.removerAgenteSelecionado = function(idAgente) {
                 agentesSelecionados = agentesSelecionados.filter(agente => agente.id !== idAgente);
                 renderizarAgentesSelecionados();
             }
@@ -439,7 +439,6 @@
                 return isValid;
             }
 
-            // FUNÇÃO CORRIGIDA - Não envia mais o usuário logado, pois o servidor obterá essa informação do token seguro
             function obterDadosDoFormulario() {
                 const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({
                     descricao: card.querySelector('.material-descricao-valor').textContent,
@@ -463,9 +462,9 @@
                 };
             }
 
-            // FUNÇÃO CORRIGIDA - Envia o token de autenticação e trata a resposta JSON
+            // FUNÇÃO CORRIGIDA - Envia o token no corpo do formulário para evitar erros de CORS
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbzZfV2sDKcl1R0VpYlL4kyqtXrRPd0yWYtfqjhMR74fioQmzHyWLej4uAVNvAswcQPy/exec';
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwY2CGGk4ydbjwvaPjU-kDsuoOzG2jif7dXRIG1tpSlrPz8XCHCdtTHTEmWQoGb4Jv-/exec';
                 const usuarioLogado = auth.currentUser;
 
                 if (!usuarioLogado) {
@@ -473,29 +472,24 @@
                     return;
                 }
 
-                // Pega o token de ID do usuário atual. É uma operação assíncrona.
+                // Pega o token de ID do usuário atual.
                 usuarioLogado.getIdToken()
                     .then(idToken => {
-                        // O token é enviado no cabeçalho 'Authorization' para o servidor verificar
-                        const headers = {
-                            'Authorization': 'Bearer ' + idToken
-                        };
-
+                        // Adiciona o token diretamente aos dados do formulário
                         const formData = new FormData();
                         for (const key in pedidoData) {
-                           formData.append(key, pedidoData[key]);
+                            formData.append(key, pedidoData[key]);
                         }
+                        formData.append('idToken', idToken); // AQUI está a mudança crucial
 
+                        // A requisição agora é "simples" e não precisa de cabeçalhos customizados
                         return fetch(apiUrl, {
                             method: 'POST',
-                            headers: headers,
                             body: formData
+                            // Não há mais 'headers' aqui!
                         });
                     })
                     .then(response => {
-                        if (response.status === 401 || response.status === 403) {
-                            throw new Error('Acesso não autorizado. Sua sessão pode ter expirado.');
-                        }
                         if (!response.ok) {
                             throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
                         }
@@ -509,7 +503,6 @@
                             agentesSelecionados = [];
                             renderizarAgentesSelecionados();
                         } else {
-                            // Exibe a mensagem de erro vinda do servidor
                             throw new Error(data.message || 'Ocorreu um erro desconhecido no servidor.');
                         }
                     })
