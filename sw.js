@@ -1,69 +1,526 @@
-// sw.js - Versão com correção de cache e tratamento de APIs externas
-const CACHE_NAME = 'pedido-caminhao-cache-v7'; // Versão incrementada para forçar a atualização
+<!DOCTYPE html>
+<html lang="pt-br">
 
-// Lista de arquivos essenciais para o App Shell.
-// Garanta que todos esses arquivos existem nos caminhos corretos no seu repositório.
-const urlsToCache = [
-  './', // Representa o index.html no diretório atual
-  'index.html',
-  'manifest.json',
-  'favicon.ico',
-  'icons/icon-192x192.png',
-  'icons/icon-512x512.png'
-  // Removido 'icon-maskable' se não existir, para evitar erro. Adicione de volta se o arquivo existir.
-];
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aplicativo para registro e gerenciamento de pedidos de caminhão para atividades de campo de controle de vetores.">
+    <title>Pedido de Caminhão</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0056b3">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Cache aberto, adicionando App Shell.');
-        // fetch() cada recurso e adiciona ao cache um por um para melhor depuração
-        const promises = urlsToCache.map(url => {
-          return fetch(url)
-            .then(response => {
-              if (!response.ok) {
-                throw new TypeError(`[Service Worker] Falha ao buscar ${url}: ${response.statusText}`);
-              }
-              return cache.put(url, response);
-            })
-            .catch(err => {
-              console.error(`[Service Worker] Não foi possível cachear ${url}.`, err);
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <style>
+        body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
+        .auth-container, .app-wrapper { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .login-box, .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; }
+        .container { max-width: 700px; }
+        h1, h2 { text-align: center; color: #333; }
+        h2 { font-size: 1.5em; margin-top: 0; }
+        .login-box .form-group { margin-bottom: 15px; }
+        .login-box label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .login-box input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .login-box .button { width: 100%; }
+        .forgot-password-link { display: block; text-align: center; margin-top: 15px; }
+        .forgot-password-link a, #back-to-login-link { color: #0056b3; text-decoration: none; cursor: pointer; }
+        .forgot-password-link a:hover, #back-to-login-link:hover { text-decoration: underline; }
+        .feedback-message { font-size: 0.9em; margin-top: 10px; text-align: center; font-weight: bold; min-height: 1.2em; }
+        .feedback-message.success { color: #155724; }
+        .feedback-message.error { color: #c82333; }
+        .user-section { background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        #user-email { font-weight: bold; color: #333; word-break: break-all; }
+        .password-toggle-link { color: #0056b3; cursor: pointer; font-size: 0.9em; text-decoration: none; }
+        .password-toggle-link:hover { text-decoration: underline; }
+        .change-password-form { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; }
+        .container { align-self: flex-start; }
+        .form-section-title { font-size: 1.2em; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
+        select, input[type="text"], input[type="number"], input[type="date"], textarea, input[type="search"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        optgroup { font-style: italic; font-weight: bold; background-color: #f0f0f0; }
+        .button-group { display: flex; justify-content: center; margin-top: 20px; }
+        .button, .add-button { background-color: #0056b3; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; margin-left: 5px; }
+        .button:hover, .add-button:hover { background-color: #004494; }
+        .remove-button { background-color: #c82333; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; margin-left: 5px; }
+        .remove-button:hover { background-color: #a81d2a; }
+        .required-asterisk { color: #c82333; margin-left: 3px; }
+        small { color: #555; }
+        .nenhum-material-mensagem { text-align: center; color: #555; padding: 15px; border: 1px dashed #ddd; border-radius: 4px; background-color: #f8f9fa; }
+        .error-message { color: red; font-size: 0.9em; margin-top: 5px; }
+        .status-message { margin-top: 15px; padding: 10px; border-radius: 4px; text-align: center; display: none; }
+        .status-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-message.processing { background-color: #fff3cd; color: #664d03; border: 1px solid #ffeeba; }
+        .agentes-selecionados-container { display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; min-height: 30px; }
+        .agente-pill { background-color: #e0e0e0; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; display: flex; align-items: center; }
+        .agente-pill .remove-agente { margin-left: 8px; cursor: pointer; font-weight: bold; color: #333; }
+        .agente-pill .remove-agente:hover { color: #000; }
+        #lista-agentes-resultado { max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-top: none; border-radius: 0 0 4px 4px; position: absolute; background-color: white; z-index: 1000; width: 100%; box-sizing: border-box; }
+        #lista-agentes-resultado div { padding: 8px; cursor: pointer; }
+        #lista-agentes-resultado div:hover { background-color: #f0f0f0; }
+        .hidden { display: none; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        #materiais-adicionados { margin-top: 20px; }
+        .material-item-card { background-color: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 15px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); display: flex; flex-direction: column; gap: 10px; }
+        .material-item-card-content { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        .material-descricao-label, .material-quantidade-label { font-weight: 600; color: #555; font-size: 0.8em; display: block; margin-bottom: 2px; }
+        .material-descricao-valor { color: #333; font-size: 0.95em; line-height: 1.4; word-break: break-word; }
+        .material-quantidade-valor { color: #333; font-size: 0.95em; font-weight: 500; }
+        .material-item-actions { align-self: flex-end; }
+        .material-item-actions .remove-button { padding: 6px 12px; font-size: 0.9em; }
+        @media (max-width: 768px) { .auth-container, .app-wrapper { padding: 0; } .login-box, .container { width: 100%; max-width: 100%; margin: 0; padding: 15px; border-radius: 0; box-shadow: none; min-height: 100vh; } h1 { font-size: 1.6em; margin-top: 10px; margin-bottom: 15px; } .form-section-title { font-size: 1.15em; } .grid-container { grid-template-columns: 1fr; gap: 12px; } .button, .add-button, .remove-button { padding: 12px 18px; } }
+        @media (min-width: 500px) { .material-item-card { flex-direction: row; align-items: center; justify-content: space-between; } .material-item-card-content { flex-direction: row; align-items: flex-start; gap: 20px; } .material-descricao-container { flex-grow: 1; } .material-quantidade-container { min-width: 80px; text-align: left; } .material-item-actions { align-self: center; margin-left: 15px; } }
+    </style>
+</head>
+
+<body>
+
+    <div id="auth-wrapper" class="auth-container">
+        <div class="login-box">
+            <div id="login-view">
+                <h2>Acessar Sistema</h2>
+                <form id="login-form">
+                    <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
+                    <div class="form-group"><label for="password">Senha</label><input type="password" id="password" required></div>
+                    <button type="submit" class="button">Entrar</button>
+                    <div id="login-error" class="feedback-message error"></div>
+                </form>
+                <div class="forgot-password-link"><a id="forgot-password-link">Esqueci a senha</a></div>
+            </div>
+            <div id="reset-view" style="display: none;">
+                <h2>Recuperar Senha</h2>
+                <form id="reset-password-form">
+                    <p style="font-size: 0.9em; color: #555; text-align: center;">Digite seu email para receber um link de recuperação.</p>
+                    <div class="form-group"><label for="reset-email">Email</label><input type="email" id="reset-email" required></div>
+                    <button type="submit" class="button">Enviar link</button>
+                    <div id="reset-message" class="feedback-message"></div>
+                </form>
+                <div class="forgot-password-link"><a id="back-to-login-link">Voltar para o Login</a></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-wrapper" style="display: none;">
+        <div class="container">
+            <div class="user-section">
+                <div class="user-info">
+                    <div style="flex-grow: 1;"><span id="user-email"></span></div>
+                    <div>
+                        <a id="toggle-password-form" class="password-toggle-link">Alterar Senha</a>
+                        <button id="logout-button" class="remove-button" style="margin-left: 15px;">Sair</button>
+                    </div>
+                </div>
+                <div class="change-password-form" id="change-password-wrapper" style="display: none;">
+                    <form id="change-password-form">
+                        <label for="new-password">Nova Senha</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="password" id="new-password" placeholder="Digite a nova senha" required style="flex-grow: 1;">
+                            <button type="submit" class="button">Alterar</button>
+                        </div>
+                        <div id="change-password-message" class="feedback-message"></div>
+                    </form>
+                </div>
+            </div>
+            <h1>Pedido de Caminhão</h1>
+            <div style="text-align: center; margin-bottom: 20px;"><button id="install-button" class="button" style="display: none;">Instalar Aplicativo</button></div>
+            <form id="pedido-form" onsubmit="event.preventDefault();">
+                <div class="form-group"><label for="data_pedido">Data do Pedido:<span class="required-asterisk">*</span></label><input type="date" id="data_pedido" name="data_pedido" required><div id="data_pedido-error" class="error-message"></div></div>
+                <div class="form-group"><label for="atividade">Atividade:<span class="required-asterisk">*</span></label><select id="atividade" name="atividade" required><option value="">Selecione...</option><option value="CC">CC - Controle de Criadouro</option><option value="ADL">ADL - Avaliação de Densidade Larvária</option><option value="NEB">NEB - Nebulização</option><option value="VIST">VIST - Vistoria</option><option value="ARR">ARR - Arrastão</option><option value="OUTROS">OUTROS</option></select><div id="atividade-error" class="error-message"></div></div>
+                <div class="form-section-title">Endereço da Atividade</div>
+                <div class="grid-container"><div class="form-group"><label for="cep">CEP:</label><input type="text" id="cep" name="cep" placeholder="00000-000"><div id="cep-error" class="error-message"></div><small>Ao sair do campo, o sistema tentará buscar o endereço.</small></div><div class="form-group"><label for="endereco">Endereço:<span class="required-asterisk">*</span></label><input type="text" id="endereco" name="endereco" required><div id="endereco-error" class="error-message"></div></div></div>
+                <div class="grid-container"><div class="form-group"><label for="numero">Número:<span class="required-asterisk">*</span></label><input type="number" id="numero" name="numero" required><div id="numero-error" class="error-message"></div></div><div class="form-group"><label for="complemento">Complemento:</label><input type="text" id="complemento" name="complemento"></div></div>
+                <div class="grid-container"><div class="form-group"><label for="bairro">Bairro:<span class="required-asterisk">*</span></label><input type="text" id="bairro" name="bairro" required><div id="bairro-error" class="error-message"></div></div><div class="form-group"><label for="regiao">Região:<span class="required-asterisk">*</span></label><select id="regiao" name="regiao" required><option value="">Selecione...</option><option value="NORTE">NORTE</option><option value="SUL">SUL</option><option value="LESTE">LESTE</option><option value="OESTE">OESTE</option><option value="CENTRO">CENTRO</option><option value="SUDESTE">SUDESTE</option></select><div id="regiao-error" class="error-message"></div></div></div>
+                <div class="grid-container"><div class="form-group"><label for="area">Área:<span class="required-asterisk">*</span></label><input type="number" id="area" name="area" required><div id="area-error" class="error-message"></div></div><div class="form-group"><label for="quadra">Quadra:<span class="required-asterisk">*</span></label><input type="number" id="quadra" name="quadra" required><div id="quadra-error" class="error-message"></div></div></div>
+                <div class="form-section-title">Seção de Materiais Solicitados<span class="required-asterisk">*</span></div>
+                <div class="grid-container"><div class="form-group"><label for="descricao_material">Descrição do Material:<span class="required-asterisk">*</span></label><select name="descricao_material" id="descricao_material"><option value="">-- Selecione uma opção --</option><optgroup label="DEPÓSITO ELEVADO (Grupo A)"><option value="A2">Não ligado a rede</option></optgroup><optgroup label="DEPÓSITO NÃO ELEVADO (Grupo B)"><option value="B4">Não ligado a rede</option></optgroup><optgroup label="MÓVEIS (Grupo C)"><option value="C5">Vaso de planta na água</option><option value="C6">Vaso de planta (diversos)</option><option value="C7">Prato/Pingadeira</option><option value="C8">Consumo animal</option><option value="C9">Depósito para construção</option><option value="C10">Depósito para horticultura</option><option value="C11">Piscina desmontável</option><option value="C12">Lata, Frasco, Plástico utilizáveis</option><option value="C13">Garrafas retornáveis</option><option value="C14">Balde/Regador</option><option value="C15">Bandeja geladeira/Ar condicionado</option><option value="C16">Material de construção</option><option value="C17">Outros (Móveis)</option></optgroup><optgroup label="PNEUS (Grupo E)"><option value="E28">Pneus</option><option value="E29">Outros correlatos (Pneus)</option></optgroup><optgroup label="PASSÍVEIS REMOÇÃO/ALTERAÇÃO (Grupo F)"><option value="F30">Lata, Frasco, Plástico</option><option value="F31">Garrafas descartáveis</option><option value="F32">Lona, Encerado, Plástico</option><option value="F33">Entulho de construção</option><option value="F34">Peças/Sucatas</option><option value="F35">Masseira</option><option value="F36">Barco</option><option value="F37">Outros (Passíveis Remoção)</option></optgroup></select><div id="descricao_material-error" class="error-message"></div></div><div class="form-group"><label for="quantidade_material">Quantidade:<span class="required-asterisk">*</span></label><input type="number" id="quantidade_material" name="quantidade_material" min="1"><div id="quantidade_material-error" class="error-message"></div></div></div>
+                <button type="button" class="add-button" id="btn-adicionar-material">Adicionar Material</button>
+                <div id="materiais-error" class="error-message"></div> 
+                <div id="materiais-adicionados"><p class="nenhum-material-mensagem">Nenhum material adicionado.</p></div>
+                <div class="form-section-title">Equipe</div>
+                <div class="form-group" style="position: relative;"><label for="agentes">Agente(s):<span class="required-asterisk">*</span></label><div class="agentes-selecionados-container" id="agentes-selecionados-container"></div><input type="search" id="busca_agente" placeholder="Buscando agentes..."><div id="lista-agentes-resultado" class="hidden"></div><div id="agentes-error" class="error-message"></div></div>
+                <div class="form-group"><label for="equipe">Equipe:<span class="required-asterisk">*</span></label><select id="equipe" name="equipe" required><option value="">Selecione...</option><option value="CCZ-NEB1">CCZ-NEB1</option><option value="CCZ-NEB2">CCZ-NEB2</option><option value="CCZ-NEB3">CCZ-NEB3</option><option value="CCZ-NEB4">CCZ-NEB4</option><option value="SÃO JUDAS">SÃO JUDAS</option><option value="VL MARIA">VL MARIA</option><option value="VL NAIR">VL NAIR</option><option value="JD SATÉLITE">JD SATÉLITE</option></select><div id="equipe-error" class="error-message"></div></div>
+                <div class="button-group"><button type="submit" id="submit-button" class="button">Registrar Atividade</button></div>
+                <div id="status-area" class="status-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSSQIrxWMc9FyQTtpjENP_hhpAXIamSyw",
+            authDomain: "pwa-pedidos-seguro.firebaseapp.com",
+            projectId: "pwa-pedidos-seguro",
+            storageBucket: "pwa-pedidos-seguro.appspot.com",
+            messagingSenderId: "188774063096",
+            appId: "1:188774063096:web:51ffeac39fbcbd01e7940d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const authWrapper = document.getElementById('auth-wrapper');
+        const appContainer = document.getElementById('app-container');
+        const loginView = document.getElementById('login-view');
+        const resetView = document.getElementById('reset-view');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const resetPasswordForm = document.getElementById('reset-password-form');
+            const forgotPasswordLink = document.getElementById('forgot-password-link');
+            const backToLoginLink = document.getElementById('back-to-login-link');
+            const loginError = document.getElementById('login-error');
+            const resetMessage = document.getElementById('reset-message');
+
+            function toggleAuthView(show) {
+                loginView.style.display = (show === 'login') ? 'block' : 'none';
+                resetView.style.display = (show === 'reset') ? 'block' : 'none';
+            }
+
+            forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthView('reset'); });
+            backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthView('login'); });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = loginForm.email.value;
+                const password = loginForm.password.value;
+                loginError.textContent = '';
+                auth.signInWithEmailAndPassword(email, password).catch(error => {
+                    loginError.textContent = 'Email ou senha inválidos.';
+                });
+            });
+
+            resetPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = resetPasswordForm['reset-email'].value;
+                resetMessage.className = 'feedback-message';
+                resetMessage.textContent = '';
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        resetMessage.textContent = 'Link de recuperação enviado. Verifique seu email.';
+                        resetMessage.classList.add('success');
+                    })
+                    .catch((error) => {
+                        resetMessage.textContent = 'Ocorreu um erro ao enviar o link. Tente novamente.';
+                        resetMessage.classList.add('error');
+                    });
+            });
+
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    authWrapper.style.display = 'none';
+                    appContainer.style.display = 'flex';
+                    document.getElementById('user-email').textContent = `Logado como: ${user.email}`;
+                    initializeAppLogic(user);
+                } else {
+                    authWrapper.style.display = 'flex';
+                    appContainer.style.display = 'none';
+                    window.appInitialized = false;
+                }
             });
         });
-        return Promise.all(promises);
-      })
-      .then(() => self.skipWaiting())
-  );
-});
 
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => Promise.all(
-      cacheNames.map(cacheName => {
-        if (!cacheWhitelist.includes(cacheName)) {
-          console.log('[Service Worker] Deletando cache antigo:', cacheName);
-          return caches.delete(cacheName);
+        function initializeAppLogic(user) {
+            if (window.appInitialized) return;
+
+            document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
+            
+            const changePasswordWrapper = document.getElementById('change-password-wrapper');
+            document.getElementById('toggle-password-form').addEventListener('click', (e) => {
+                e.preventDefault();
+                const isHidden = changePasswordWrapper.style.display === 'none';
+                changePasswordWrapper.style.display = isHidden ? 'block' : 'none';
+            });
+            
+            document.getElementById('change-password-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newPasswordInput = document.getElementById('new-password');
+                const changePasswordMessage = document.getElementById('change-password-message');
+                changePasswordMessage.className = 'feedback-message';
+                changePasswordMessage.textContent = '';
+                user.updatePassword(newPasswordInput.value).then(() => {
+                    changePasswordMessage.textContent = 'Senha alterada com sucesso!';
+                    changePasswordMessage.classList.add('success');
+                    newPasswordInput.value = '';
+                }).catch(error => {
+                    changePasswordMessage.textContent = 'Erro ao alterar a senha. Faça logout e login novamente.';
+                    changePasswordMessage.classList.add('error');
+                });
+            });
+
+            let todosAgentes = [], agentesSelecionados = [];
+            const pedidoForm = document.getElementById('pedido-form');
+            const cepInput = document.getElementById('cep');
+            const btnAdicionarMaterial = document.getElementById('btn-adicionar-material');
+            const buscaAgenteInput = document.getElementById('busca_agente');
+            const listaAgentesResultado = document.getElementById('lista-agentes-resultado');
+            
+            carregarAgentesDaPlanilha();
+
+            cepInput.addEventListener('blur', function() {
+                const cep = this.value.replace(/\D/g, '');
+                if (cep.length === 8) buscarCep(cep);
+                else if (cep.length > 0) document.getElementById('cep-error').textContent = 'CEP inválido.';
+                else document.getElementById('cep-error').textContent = '';
+            });
+
+            btnAdicionarMaterial.addEventListener('click', adicionarMaterialNaLista);
+            
+            document.getElementById('materiais-adicionados').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('remove-material')) {
+                    removerMaterialDaLista(e.target);
+                }
+            });
+
+            buscaAgenteInput.addEventListener('input', function() {
+                const termoBusca = this.value.toLowerCase();
+                listaAgentesResultado.innerHTML = '';
+                if (termoBusca.length > 0 && todosAgentes.length > 0) {
+                    const filtrados = todosAgentes.filter(agente => 
+                        agente.nome.toLowerCase().includes(termoBusca) &&
+                        !agentesSelecionados.find(sel => sel.id === agente.id)
+                    );
+                    if (filtrados.length > 0) {
+                        filtrados.forEach(agente => {
+                            const div = document.createElement('div');
+                            div.textContent = agente.nome;
+                            div.dataset.id = agente.id;
+                            div.dataset.nome = agente.nome;
+                            div.addEventListener('click', selecionarAgente);
+                            listaAgentesResultado.appendChild(div);
+                        });
+                        listaAgentesResultado.classList.remove('hidden');
+                    } else {
+                        listaAgentesResultado.classList.add('hidden');
+                    }
+                } else {
+                    listaAgentesResultado.classList.add('hidden');
+                }
+            });
+
+            buscaAgenteInput.addEventListener('focus', function() {
+                const termoBusca = this.value.toLowerCase();
+                if (listaAgentesResultado.children.length > 0 && (termoBusca.length > 0 || listaAgentesResultado.innerHTML !== '')) {
+                     listaAgentesResultado.classList.remove('hidden');
+                } else if (termoBusca.length === 0 && todosAgentes.length > 0) {
+                    listaAgentesResultado.innerHTML = '';
+                     const naoSelecionados = todosAgentes.filter(agente => !agentesSelecionados.find(sel => sel.id === agente.id));
+                     naoSelecionados.forEach(agente => {
+                        const div = document.createElement('div');
+                        div.textContent = agente.nome;
+                        div.dataset.id = agente.id;
+                        div.dataset.nome = agente.nome;
+                        div.addEventListener('click', selecionarAgente);
+                        listaAgentesResultado.appendChild(div);
+                    });
+                    if (naoSelecionados.length > 0) listaAgentesResultado.classList.remove('hidden');
+                }
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!buscaAgenteInput.contains(event.target) && !listaAgentesResultado.contains(event.target)) {
+                    listaAgentesResultado.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('submit-button').addEventListener('click', function(event) {
+                event.preventDefault();
+                if (validarFormulario()) {
+                    mostrarStatus("Processando...", "processing");
+                    registrarPedido(obterDadosDoFormulario());
+                }
+            });
+            
+            window.appInitialized = true;
+            
+            function carregarAgentesDaPlanilha() {
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwWc0AQcE1CfZmJQgcNFDlWXX3MMr9EZ5tmh3_TIqdT5uCguz-ZmlWZcSneQzLc4nQbPQ/exec'; 
+                buscaAgenteInput.placeholder = "Carregando agentes...";
+                buscaAgenteInput.disabled = true;
+                fetch(apiUrl)
+                    .then(response => { if (!response.ok) throw new Error(`Erro na API: ${response.status}`); return response.json(); })
+                    .then(data => {
+                        if (data.error) throw new Error(`Erro da API de Agentes: ${data.error}`);
+                        if (data.agentes && Array.isArray(data.agentes)) {
+                            todosAgentes = data.agentes.map(nome => ({ id: nome.toLowerCase().replace(/\s+/g, '-'), nome: nome }));
+                            document.getElementById('agentes-error').textContent = ""; 
+                            buscaAgenteInput.placeholder = "Buscar agente pelo nome...";
+                        } else { throw new Error('Formato de dados inesperado.'); }
+                    })
+                    .catch(error => {
+                        document.getElementById('agentes-error').textContent = `Falha ao carregar agentes: ${error.message}`;
+                        buscaAgenteInput.placeholder = "Falha ao carregar agentes";
+                    })
+                    .finally(() => { buscaAgenteInput.disabled = false; });
+            }
+
+            function mostrarStatus(mensagem, tipo = 'info') {
+                const statusArea = document.getElementById('status-area');
+                statusArea.textContent = mensagem;
+                statusArea.className = 'status-message'; 
+                if (tipo) statusArea.classList.add(tipo);
+                statusArea.style.display = 'block';
+            }
+
+            function buscarCep(cep) {
+                mostrarStatus("Buscando CEP...", "processing");
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('status-area').style.display = 'none';
+                        if (data.erro) { document.getElementById('cep-error').textContent = 'CEP não encontrado.'; } 
+                        else {
+                            document.getElementById('endereco').value = data.logradouro || '';
+                            document.getElementById('bairro').value = data.bairro || '';
+                            document.getElementById('cep-error').textContent = '';
+                            if (data.logradouro) document.getElementById('numero').focus();
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('cep-error').textContent = 'Erro ao buscar CEP.';
+                        document.getElementById('status-area').style.display = 'none';
+                    });
+            }
+
+            function adicionarMaterialNaLista() {
+                const descSelect = document.getElementById('descricao_material');
+                const qtdInput = document.getElementById('quantidade_material');
+                let valid = true;
+                document.getElementById('descricao_material-error').textContent = '';
+                document.getElementById('quantidade_material-error').textContent = '';
+                if (!descSelect.value) { document.getElementById('descricao_material-error').textContent = 'Obrigatório.'; valid = false; }
+                if (isNaN(parseInt(qtdInput.value)) || parseInt(qtdInput.value) < 1) { document.getElementById('quantidade_material-error').textContent = 'Inválido.'; valid = false; }
+                if (!valid) return;
+                const opt = descSelect.options[descSelect.selectedIndex];
+                const desc = (opt.parentNode.label) ? `${opt.parentNode.label} - ${opt.text}` : opt.text;
+                const container = document.getElementById('materiais-adicionados');
+                container.querySelector('.nenhum-material-mensagem')?.remove();
+                const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${desc}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${parseInt(qtdInput.value)}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+                descSelect.value = ''; qtdInput.value = '';
+            }
+
+            function removerMaterialDaLista(botao) {
+                botao.closest('.material-item-card')?.remove();
+                const container = document.getElementById('materiais-adicionados');
+                if (container.children.length === 0) { container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>'; }
+            }
+            
+            function selecionarAgente(event) {
+                const { id, nome } = event.target.dataset;
+                if (!agentesSelecionados.some(ag => ag.id === id)) {
+                    agentesSelecionados.push({ id, nome });
+                    renderizarAgentesSelecionados();
+                    buscaAgenteInput.value = '';
+                    listaAgentesResultado.classList.add('hidden');
+                }
+            }
+            
+            window.removerAgenteSelecionado = function(idAgente) {
+                agentesSelecionados = agentesSelecionados.filter(agente => agente.id !== idAgente);
+                renderizarAgentesSelecionados();
+            }
+
+            function renderizarAgentesSelecionados() {
+                document.getElementById('agentes-selecionados-container').innerHTML = agentesSelecionados.map(agente => `<span class="agente-pill">${agente.nome}<span class="remove-agente" data-id="${agente.id}" onclick="removerAgenteSelecionado('${agente.id}')">x</span></span>`).join('');
+            }
+
+            function validarFormulario() {
+                let isValid = true;
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                const campos = [{id:'data_pedido', msg:'Data do pedido é obrigatória.'},{id:'atividade', msg:'Atividade é obrigatória.'},{id:'endereco', msg:'Endereço é obrigatório.'},{id:'numero', msg:'Número é obrigatório.'},{id:'bairro', msg:'Bairro é obrigatório.'},{id:'regiao', msg:'Região é obrigatória.'},{id:'area', msg:'Área é obrigatória.'},{id:'quadra', msg:'Quadra é obrigatória.'},{id:'equipe', msg:'Equipe é obrigatória.'}];
+                campos.forEach(c => { if(!document.getElementById(c.id).value.trim()){ document.getElementById(`${c.id}-error`).textContent = c.msg; isValid = false; }});
+                if (document.querySelectorAll('#materiais-adicionados .material-item-card').length === 0) { document.getElementById('materiais-error').textContent = 'Adicione pelo menos um material.'; isValid = false; }
+                if (agentesSelecionados.length === 0) { document.getElementById('agentes-error').textContent = 'Selecione pelo menos um agente.'; isValid = false; }
+                return isValid;
+            }
+
+            function obterDadosDoFormulario() {
+                const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({
+                    descricao: card.querySelector('.material-descricao-valor').textContent,
+                    quantidade: parseInt(card.querySelector('.material-quantidade-valor').textContent)
+                }));
+                const [year, month, day] = document.getElementById('data_pedido').value.split('-');
+                return {
+                    data_pedido: `${day}/${month}/${year}`,
+                    atividade: document.getElementById('atividade').value,
+                    cep: document.getElementById('cep').value,
+                    endereco: document.getElementById('endereco').value,
+                    numero: document.getElementById('numero').value,
+                    complemento: document.getElementById('complemento').value,
+                    bairro: document.getElementById('bairro').value,
+                    regiao: document.getElementById('regiao').value,
+                    area: document.getElementById('area').value,
+                    quadra: document.getElementById('quadra').value,
+                    materiais_solicitados: JSON.stringify(materiais),
+                    agentes: JSON.stringify(agentesSelecionados.map(a => a.nome)),
+                    equipe: document.getElementById('equipe').value
+                };
+            }
+
+            // FUNÇÃO CORRIGIDA - Envia o token no corpo do formulário para evitar erros de CORS
+            function registrarPedido(pedidoData) {
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwY2CGGk4ydbjwvaPjU-kDsuoOzG2jif7dXRIG1tpSlrPz8XCHCdtTHTEmWQoGb4Jv-/exec';
+                const usuarioLogado = auth.currentUser;
+
+                if (!usuarioLogado) {
+                    mostrarStatus('Erro: Usuário não autenticado. Por favor, faça login novamente.', "error");
+                    return;
+                }
+
+                // Pega o token de ID do usuário atual.
+                usuarioLogado.getIdToken()
+                    .then(idToken => {
+                        // Adiciona o token diretamente aos dados do formulário
+                        const formData = new FormData();
+                        for (const key in pedidoData) {
+                            formData.append(key, pedidoData[key]);
+                        }
+                        formData.append('idToken', idToken); // AQUI está a mudança crucial
+
+                        // A requisição agora é "simples" e não precisa de cabeçalhos customizados
+                        return fetch(apiUrl, {
+                            method: 'POST',
+                            body: formData
+                            // Não há mais 'headers' aqui!
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
+                        }
+                        return response.json(); // Esperamos uma resposta JSON do script
+                    })
+                    .then(data => {
+                        if (data.status === "success") {
+                            mostrarStatus("Pedido registrado com sucesso!", "success");
+                            pedidoForm.reset();
+                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            agentesSelecionados = [];
+                            renderizarAgentesSelecionados();
+                        } else {
+                            throw new Error(data.message || 'Ocorreu um erro desconhecido no servidor.');
+                        }
+                    })
+                    .catch(error => {
+                        mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
+                    });
+            }
         }
-      })
-    )).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  const requestUrl = new URL(event.request.url);
-
-  // Não intercepta chamadas para APIs externas.
-  if (requestUrl.hostname === 'script.google.com' || requestUrl.hostname === 'viacep.com.br') {
-    return; // Deixa a requisição passar direto para a rede
-  }
-
-  // Estratégia "Cache-First" para os arquivos do próprio app
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        return cachedResponse || fetch(event.request);
-      })
-  );
-});
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            const installButton = document.getElementById('install-button');
+            if(installButton) { installButton.style.display = 'block'; installButton.addEventListener('click', () => { installButton.style.display = 'none'; deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); }); }
+        });
+        window.addEventListener('appinstalled', () => { const installButton = document.getElementById('install-button'); if(installButton) installButton.style.display = 'none'; deferredPrompt = null; });
+    </script>
+</body>
+</html>
