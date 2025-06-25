@@ -205,8 +205,8 @@
                         resetMessage.classList.add('success');
                     })
                     .catch((error) => {
-                        resetMessage.textContent = 'Link de recuperação enviado. Verifique seu email.';
-                        resetMessage.classList.add('success');
+                        resetMessage.textContent = 'Ocorreu um erro ao enviar o link. Tente novamente.';
+                        resetMessage.classList.add('error');
                     });
             });
 
@@ -247,7 +247,7 @@
                     changePasswordMessage.classList.add('success');
                     newPasswordInput.value = '';
                 }).catch(error => {
-                    changePasswordMessage.textContent = 'Erro ao alterar a senha.';
+                    changePasswordMessage.textContent = 'Erro ao alterar a senha. Faça logout e login novamente.';
                     changePasswordMessage.classList.add('error');
                 });
             });
@@ -352,7 +352,7 @@
                         } else { throw new Error('Formato de dados inesperado.'); }
                     })
                     .catch(error => {
-                        document.getElementById('agentes-error').textContent = `Falha: ${error.message}`;
+                        document.getElementById('agentes-error').textContent = `Falha ao carregar agentes: ${error.message}`;
                         buscaAgenteInput.placeholder = "Falha ao carregar agentes";
                     })
                     .finally(() => { buscaAgenteInput.disabled = false; });
@@ -439,36 +439,83 @@
                 return isValid;
             }
 
+            // FUNÇÃO CORRIGIDA - Não envia mais o usuário logado, pois o servidor obterá essa informação do token seguro
             function obterDadosDoFormulario() {
-                const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({ descricao: card.querySelector('.material-descricao-valor').textContent, quantidade: parseInt(card.querySelector('.material-quantidade-valor').textContent) }));
+                const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({
+                    descricao: card.querySelector('.material-descricao-valor').textContent,
+                    quantidade: parseInt(card.querySelector('.material-quantidade-valor').textContent)
+                }));
                 const [year, month, day] = document.getElementById('data_pedido').value.split('-');
-                const usuarioLogado = auth.currentUser;
                 return {
                     data_pedido: `${day}/${month}/${year}`,
-                    atividade: document.getElementById('atividade').value, cep: document.getElementById('cep').value,
-                    endereco: document.getElementById('endereco').value, numero: document.getElementById('numero').value,
-                    complemento: document.getElementById('complemento').value, bairro: document.getElementById('bairro').value,
-                    regiao: document.getElementById('regiao').value, area: document.getElementById('area').value,
-                    quadra: document.getElementById('quadra').value, materiais_solicitados: JSON.stringify(materiais),
-                    agentes: JSON.stringify(agentesSelecionados.map(a => a.nome)), equipe: document.getElementById('equipe').value,
-                    usuario_logado: usuarioLogado ? usuarioLogado.email : 'N/A'
+                    atividade: document.getElementById('atividade').value,
+                    cep: document.getElementById('cep').value,
+                    endereco: document.getElementById('endereco').value,
+                    numero: document.getElementById('numero').value,
+                    complemento: document.getElementById('complemento').value,
+                    bairro: document.getElementById('bairro').value,
+                    regiao: document.getElementById('regiao').value,
+                    area: document.getElementById('area').value,
+                    quadra: document.getElementById('quadra').value,
+                    materiais_solicitados: JSON.stringify(materiais),
+                    agentes: JSON.stringify(agentesSelecionados.map(a => a.nome)),
+                    equipe: document.getElementById('equipe').value
                 };
             }
 
+            // FUNÇÃO CORRIGIDA - Envia o token de autenticação e trata a resposta JSON
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbyoRSf_Bi3F3an5zAmZnoVEIFD8FQoCBpIG2D0vaoHdQ8krOLWDQn4SvQP0bSDTFA4/exec'; 
-                fetch(apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(pedidoData).toString() })
-                .then(response => { if (!response.ok) throw new Error('Erro de rede.'); return response.text(); })
-                .then(data => {
-                    const isSuccess = data.includes("success") || data.trim().toUpperCase() === "OK";
-                    if (isSuccess) {
-                        mostrarStatus("Pedido registrado com sucesso!", "success");
-                        pedidoForm.reset();
-                        document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
-                        agentesSelecionados = []; renderizarAgentesSelecionados();
-                    } else { throw new Error('Erro no servidor: ' + data); }
-                })
-                .catch(error => { mostrarStatus('Erro ao registrar pedido: ' + error.message, "error"); });
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbzZfV2sDKcl1R0VpYlL4kyqtXrRPd0yWYtfqjhMR74fioQmzHyWLej4uAVNvAswcQPy/exec';
+                const usuarioLogado = auth.currentUser;
+
+                if (!usuarioLogado) {
+                    mostrarStatus('Erro: Usuário não autenticado. Por favor, faça login novamente.', "error");
+                    return;
+                }
+
+                // Pega o token de ID do usuário atual. É uma operação assíncrona.
+                usuarioLogado.getIdToken()
+                    .then(idToken => {
+                        // O token é enviado no cabeçalho 'Authorization' para o servidor verificar
+                        const headers = {
+                            'Authorization': 'Bearer ' + idToken
+                        };
+
+                        const formData = new FormData();
+                        for (const key in pedidoData) {
+                           formData.append(key, pedidoData[key]);
+                        }
+
+                        return fetch(apiUrl, {
+                            method: 'POST',
+                            headers: headers,
+                            body: formData
+                        });
+                    })
+                    .then(response => {
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error('Acesso não autorizado. Sua sessão pode ter expirado.');
+                        }
+                        if (!response.ok) {
+                            throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
+                        }
+                        return response.json(); // Esperamos uma resposta JSON do script
+                    })
+                    .then(data => {
+                        if (data.status === "success") {
+                            mostrarStatus("Pedido registrado com sucesso!", "success");
+                            pedidoForm.reset();
+                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            agentesSelecionados = [];
+                            renderizarAgentesSelecionados();
+                        } else {
+                            // Exibe a mensagem de erro vinda do servidor
+                            throw new Error(data.message || 'Ocorreu um erro desconhecido no servidor.');
+                        }
+                    })
+                    .catch(error => {
+                        mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
+                    });
             }
         }
     </script>
