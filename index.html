@@ -44,14 +44,11 @@
         label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
         select, input[type="text"], input[type="number"], input[type="date"], textarea, input[type="search"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         optgroup { font-style: italic; font-weight: bold; background-color: #f0f0f0; }
-        .button-group { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-        .button, .add-button, .clear-button { background-color: #0056b3; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; }
-        .button:hover, .add-button:hover, .clear-button:hover { background-color: #004494; }
-        .remove-button { background-color: #c82333; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; }
+        .button-group { display: flex; justify-content: center; margin-top: 20px; }
+        .button, .add-button { background-color: #0056b3; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; margin-left: 5px; }
+        .button:hover, .add-button:hover { background-color: #004494; }
+        .remove-button { background-color: #c82333; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; margin-left: 5px; }
         .remove-button:hover { background-color: #a81d2a; }
-        .clear-button { background-color: #6c757d; }
-        .clear-button:hover { background-color: #5a6268; }
-        .add-button { margin-left: 5px; }
         .required-asterisk { color: #c82333; margin-left: 3px; }
         small { color: #555; }
         .nenhum-material-mensagem { text-align: center; color: #555; padding: 15px; border: 1px dashed #ddd; border-radius: 4px; background-color: #f8f9fa; }
@@ -148,10 +145,7 @@
                 <div class="form-section-title">Equipe</div>
                 <div class="form-group" style="position: relative;"><label for="agentes">Agente(s):<span class="required-asterisk">*</span></label><div class="agentes-selecionados-container" id="agentes-selecionados-container"></div><input type="search" id="busca_agente" placeholder="Buscando agentes..."><div id="lista-agentes-resultado" class="hidden"></div><div id="agentes-error" class="error-message"></div></div>
                 <div class="form-group"><label for="equipe">Equipe:<span class="required-asterisk">*</span></label><select id="equipe" name="equipe" required><option value="">Selecione...</option><option value="CCZ-NEB1">CCZ-NEB1</option><option value="CCZ-NEB2">CCZ-NEB2</option><option value="CCZ-NEB3">CCZ-NEB3</option><option value="CCZ-NEB4">CCZ-NEB4</option><option value="SÃO JUDAS">SÃO JUDAS</option><option value="VL MARIA">VL MARIA</option><option value="VL NAIR">VL NAIR</option><option value="JD SATÉLITE">JD SATÉLITE</option></select><div id="equipe-error" class="error-message"></div></div>
-                <div class="button-group">
-                    <button type="submit" id="submit-button" class="button">Registrar Atividade</button>
-                    <button type="button" id="clear-form-button" class="clear-button">Limpar Formulário</button>
-                </div>
+                <div class="button-group"><button type="submit" id="submit-button" class="button">Registrar Atividade</button></div>
                 <div id="status-area" class="status-message"></div>
             </form>
         </div>
@@ -279,7 +273,6 @@
             document.getElementById('materiais-adicionados').addEventListener('click', function(e) {
                 if (e.target && e.target.classList.contains('remove-material')) {
                     removerMaterialDaLista(e.target);
-                    salvarEstadoFormulario(); // Salva o estado após remover um material
                 }
             });
 
@@ -341,20 +334,7 @@
                     registrarPedido(obterDadosDoFormulario());
                 }
             });
-
-            // NOVA AÇÃO: Adiciona listener ao botão de limpar
-            document.getElementById('clear-form-button').addEventListener('click', () => {
-                if (confirm('Tem certeza que deseja limpar todos os campos do formulário?')) {
-                    limparFormularioCompleto();
-                }
-            });
             
-            // NOVO: Adiciona listener para salvar dados em qualquer mudança
-            pedidoForm.addEventListener('input', salvarEstadoFormulario);
-            
-            // NOVO: Carrega os dados salvos quando a aplicação inicia
-            carregarEstadoFormulario();
-
             window.appInitialized = true;
             
             function carregarAgentesDaPlanilha() {
@@ -377,85 +357,6 @@
                     })
                     .finally(() => { buscaAgenteInput.disabled = false; });
             }
-            
-            // --- FUNÇÕES DE PERSISTÊNCIA ---
-
-            const STORAGE_KEY = 'pedidoFormData';
-
-            function salvarEstadoFormulario() {
-                const materiais = Array.from(document.querySelectorAll('#materiais-adicionados .material-item-card')).map(card => ({
-                    descricao: card.querySelector('.material-descricao-valor').textContent,
-                    quantidade: parseInt(card.querySelector('.material-quantidade-valor').textContent)
-                }));
-                
-                const estado = {
-                    data_pedido: document.getElementById('data_pedido').value,
-                    atividade: document.getElementById('atividade').value,
-                    cep: document.getElementById('cep').value,
-                    endereco: document.getElementById('endereco').value,
-                    numero: document.getElementById('numero').value,
-                    complemento: document.getElementById('complemento').value,
-                    bairro: document.getElementById('bairro').value,
-                    regiao: document.getElementById('regiao').value,
-                    area: document.getElementById('area').value,
-                    quadra: document.getElementById('quadra').value,
-                    equipe: document.getElementById('equipe').value,
-                    agentesSelecionados: agentesSelecionados,
-                    materiaisAdicionados: materiais
-                };
-                
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
-            }
-
-            function carregarEstadoFormulario() {
-                const estadoSalvo = localStorage.getItem(STORAGE_KEY);
-                if (!estadoSalvo) return;
-
-                const estado = JSON.parse(estadoSalvo);
-                
-                document.getElementById('data_pedido').value = estado.data_pedido || '';
-                document.getElementById('atividade').value = estado.atividade || '';
-                document.getElementById('cep').value = estado.cep || '';
-                document.getElementById('endereco').value = estado.endereco || '';
-                document.getElementById('numero').value = estado.numero || '';
-                document.getElementById('complemento').value = estado.complemento || '';
-                document.getElementById('bairro').value = estado.bairro || '';
-                document.getElementById('regiao').value = estado.regiao || '';
-                document.getElementById('area').value = estado.area || '';
-                document.getElementById('quadra').value = estado.quadra || '';
-                document.getElementById('equipe').value = estado.equipe || '';
-
-                if (estado.agentesSelecionados && estado.agentesSelecionados.length > 0) {
-                    agentesSelecionados = estado.agentesSelecionados;
-                    renderizarAgentesSelecionados();
-                }
-
-                if (estado.materiaisAdicionados && estado.materiaisAdicionados.length > 0) {
-                    const container = document.getElementById('materiais-adicionados');
-                    container.innerHTML = ''; // Limpa a mensagem padrão
-                    estado.materiaisAdicionados.forEach(material => {
-                        const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${material.descricao}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${material.quantidade}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
-                        container.insertAdjacentHTML('beforeend', cardHTML);
-                    });
-                }
-            }
-
-            function limparDadosSalvos() {
-                localStorage.removeItem(STORAGE_KEY);
-            }
-
-            function limparFormularioCompleto() {
-                pedidoForm.reset();
-                document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
-                agentesSelecionados = [];
-                renderizarAgentesSelecionados();
-                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-                document.getElementById('status-area').style.display = 'none';
-                limparDadosSalvos();
-            }
-
-
-            // --- FIM DAS FUNÇÕES DE PERSISTÊNCIA ---
 
             function mostrarStatus(mensagem, tipo = 'info') {
                 const statusArea = document.getElementById('status-area');
@@ -501,7 +402,6 @@
                 const cardHTML = `<div class="material-item-card"><div class="material-item-card-content"><div class="material-descricao-container"><span class="material-descricao-label">Descrição:</span><span class="material-descricao-valor">${desc}</span></div><div class="material-quantidade-container"><span class="material-quantidade-label">Qtd:</span><span class="material-quantidade-valor">${parseInt(qtdInput.value)}</span></div></div><div class="material-item-actions"><button type="button" class="remove-button remove-material">Remover</button></div></div>`;
                 container.insertAdjacentHTML('beforeend', cardHTML);
                 descSelect.value = ''; qtdInput.value = '';
-                salvarEstadoFormulario(); // Salva o estado após adicionar um material
             }
 
             function removerMaterialDaLista(botao) {
@@ -517,14 +417,12 @@
                     renderizarAgentesSelecionados();
                     buscaAgenteInput.value = '';
                     listaAgentesResultado.classList.add('hidden');
-                    salvarEstadoFormulario(); // Salva o estado após selecionar um agente
                 }
             }
             
             window.removerAgenteSelecionado = function(idAgente) {
                 agentesSelecionados = agentesSelecionados.filter(agente => agente.id !== idAgente);
                 renderizarAgentesSelecionados();
-                salvarEstadoFormulario(); // Salva o estado após remover um agente
             }
 
             function renderizarAgentesSelecionados() {
@@ -564,8 +462,9 @@
                 };
             }
 
+            // FUNÇÃO CORRIGIDA - Envia o token no corpo do formulário para evitar erros de CORS
             function registrarPedido(pedidoData) {
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbyoRSf_Bi3F3an5zAmZnoVEIFD8FQoCBpIG2D0vaoHdQ8krOLWDQn4SvQP0bSDTFA4/exec';
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwY2CGGk4ydbjwvaPjU-kDsuoOzG2jif7dXRIG1tpSlrPz8XCHCdtTHTEmWQoGb4Jv-/exec';
                 const usuarioLogado = auth.currentUser;
 
                 if (!usuarioLogado) {
@@ -573,23 +472,36 @@
                     return;
                 }
 
+                // Pega o token de ID do usuário atual.
                 usuarioLogado.getIdToken()
                     .then(idToken => {
+                        // Adiciona o token diretamente aos dados do formulário
                         const formData = new FormData();
                         for (const key in pedidoData) {
                             formData.append(key, pedidoData[key]);
                         }
-                        formData.append('idToken', idToken);
-                        return fetch(apiUrl, { method: 'POST', body: formData });
+                        formData.append('idToken', idToken); // AQUI está a mudança crucial
+
+                        // A requisição agora é "simples" e não precisa de cabeçalhos customizados
+                        return fetch(apiUrl, {
+                            method: 'POST',
+                            body: formData
+                            // Não há mais 'headers' aqui!
+                        });
                     })
                     .then(response => {
-                        if (!response.ok) throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
-                        return response.json();
+                        if (!response.ok) {
+                            throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
+                        }
+                        return response.json(); // Esperamos uma resposta JSON do script
                     })
                     .then(data => {
                         if (data.status === "success") {
                             mostrarStatus("Pedido registrado com sucesso!", "success");
-                            limparFormularioCompleto(); // Limpa o formulário E os dados salvos
+                            pedidoForm.reset();
+                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            agentesSelecionados = [];
+                            renderizarAgentesSelecionados();
                         } else {
                             throw new Error(data.message || 'Ocorreu um erro desconhecido no servidor.');
                         }
