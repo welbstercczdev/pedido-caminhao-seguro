@@ -8,8 +8,7 @@
     <title>Pedido de Caminhão</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a202c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff"> <!-- Alterado para branco para combinar com a UI -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
@@ -21,27 +20,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
-    <!-- SCRIPT PARA APLICAR TEMA ANTES DA RENDERIZAÇÃO -->
-    <script>
-        (function() {
-            try {
-                const theme = localStorage.getItem('theme');
-                if (theme === 'dark') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                } else if (theme === 'light') {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                }
-            } catch (e) { /* Ignora erros */ }
-        })();
-    </script>
-
-
     <style>
-        /* --- VARIAVEIS GLOBAIS DE TEMA (MODO CLARO - PADRÃO) --- */
+        /* --- VARIAVEIS GLOBAIS DE TEMA --- */
         :root {
-            --primary-color: #007AFF;
+            --primary-color: #007AFF; /* Azul vibrante estilo iOS */
             --primary-color-dark: #005bb5;
             --danger-color: #e53e3e;
             --danger-color-dark: #c53030;
@@ -57,17 +39,6 @@
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* --- VARIÁVEIS DO MODO ESCURO --- */
-        [data-theme="dark"] {
-            --bg-color: #1a202c;
-            --surface-color: #2d3748;
-            --text-color: #f7fafc;
-            --text-color-light: #a0aec0;
-            --border-color: #4a5568;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
-        }
-
         /* --- RESET E ESTILOS GLOBAIS --- */
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -78,154 +49,227 @@
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            transition: background-color 0.2s, color 0.2s;
         }
 
         /* --- LAYOUT PRINCIPAL --- */
-        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .login-box {
-            background-color: var(--surface-color); padding: 30px 25px; border-radius: var(--border-radius);
-            box-shadow: var(--shadow); width: 100%; max-width: 400px; transition: background-color 0.2s;
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Centralizado verticalmente */
+            min-height: 100vh;
+            padding: 20px;
         }
-        .app-wrapper { padding-bottom: 100px; }
-        .container { padding: 16px; max-width: 800px; margin: 0 auto; }
+        .login-box {
+            background-color: var(--surface-color);
+            padding: 30px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .app-wrapper {
+            padding-bottom: 100px; /* Espaço para o footer flutuante */
+        }
+        
+        .container {
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
         /* --- CABEÇALHO DO APP --- */
         .app-header {
-            background-color: var(--surface-color); padding: 12px 16px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-            position: sticky; top: 0; z-index: 100; transition: background-color 0.2s, border-color 0.2s;
+            background-color: var(--surface-color);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .user-info span { font-size: 0.9em; color: var(--text-color-light); }
-        .user-info strong { color: var(--text-color); word-break: break-all; }
-        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .user-info span {
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
+        .user-info strong {
+            color: var(--text-color);
+            word-break: break-all;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .password-toggle-link {
-            font-size: 0.9em; color: var(--primary-color); cursor: pointer;
-            text-decoration: none; font-weight: 500;
+            font-size: 0.9em;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
         }
 
         /* --- TÍTULOS E SEÇÕES --- */
-        h1, h2 { text-align: center; color: var(--text-color); margin-bottom: 24px; }
-        h1 { margin: 24px 0; font-size: 1.8em; }
+        h1 { text-align: center; color: var(--text-color); margin: 24px 0; font-size: 1.8em; }
+        h2 { text-align: center; color: var(--text-color); margin-bottom: 24px; }
         .form-section-title {
-            font-size: 1.25em; font-weight: 600; color: var(--text-color); border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 8px; margin-top: 32px; margin-bottom: 20px;
+            font-size: 1.25em;
+            font-weight: 600;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-top: 32px;
+            margin-bottom: 20px;
         }
 
         /* --- FORMULÁRIOS --- */
         .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 8px; color: var(--text-color-light); font-weight: 500; font-size: 0.9em; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color-light);
+            font-weight: 500;
+            font-size: 0.9em;
+        }
         select, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input[type="password"], textarea {
-            width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px;
-            box-sizing: border-box; font-size: 16px; background-color: var(--surface-color); color: var(--text-color);
-            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: var(--surface-color);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         select:focus, input:focus, textarea:focus {
-            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
         }
         .required-asterisk { color: var(--danger-color); margin-left: 2px; }
         small { color: var(--text-color-light); font-size: 0.8em; margin-top: 4px; display: block;}
 
         /* --- BOTÕES --- */
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px;
-            border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;
-            transition: all 0.2s ease; text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
         }
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-primary:hover { background-color: var(--primary-color-dark); box-shadow: var(--shadow); }
         .btn-secondary { background-color: #e2e8f0; color: #4a5568; }
         .btn-secondary:hover { background-color: #cbd5e0; }
-        [data-theme="dark"] .btn-secondary { background-color: #4a5568; color: #e2e8f0; }
-        [data-theme="dark"] .btn-secondary:hover { background-color: #718096; }
         .btn-danger { background-color: var(--danger-color); color: white; }
         .btn-danger:hover { background-color: var(--danger-color-dark); box-shadow: var(--shadow); }
         .btn-full-width { width: 100%; }
-
-        /* --- BOTÃO DE TEMA (DARK MODE) --- */
-        #theme-toggle {
-            background: none; border: none; cursor: pointer; padding: 5px; color: var(--text-color);
-            display: flex; align-items: center; justify-content: center; transition: color 0.2s, transform 0.2s;
-        }
-        #theme-toggle:hover { transform: scale(1.1); }
-        #theme-toggle .icon-sun { display: none; }
-        [data-theme="dark"] #theme-toggle .icon-moon { display: none; }
-        [data-theme="dark"] #theme-toggle .icon-sun { display: block; }
         
         /* --- LAYOUT FOOTER FLUTUANTE --- */
         .sticky-footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, var(--surface-color), hsla(0, 0%, 100%, 0.9));
-            padding: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid var(--border-color);
-            z-index: 100; transition: background-color 0.2s, border-color 0.2s;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--surface-color), rgba(255, 255, 255, 0.8));
+            padding: 16px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            border-top: 1px solid var(--border-color);
         }
-        [data-theme="dark"] .sticky-footer { background: linear-gradient(to top, var(--surface-color), rgba(45, 55, 72, 0.9)); }
         
         /* --- COMPONENTES ESPECÍFICOS --- */
+
+        /* Card de Material Adicionado */
         #materiais-adicionados { margin-top: 20px; display: grid; gap: 12px; }
-        .nenhum-material-mensagem { text-align: center; color: var(--text-color-light); padding: 20px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background-color: var(--surface-color); }
         .material-card {
-            background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius);
-            padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 15px;
-            box-shadow: var(--shadow); transition: background-color 0.2s, border-color 0.2s;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            box-shadow: var(--shadow);
         }
         .material-card-content { flex-grow: 1; }
-        .material-card-desc { font-size: 1em; font-weight: 500; margin-bottom: 4px; }
-        .material-card-qtd { font-size: 0.9em; color: var(--text-color-light); }
+        .material-card-desc {
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .material-card-qtd {
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
         .material-card-qtd strong { color: var(--primary-color); }
         .btn-icon-remove {
-            background-color: #fee2e2; color: var(--danger-color); width: 40px; height: 40px; padding: 0;
-            border-radius: 50%; font-size: 1.2em; flex-shrink: 0;
+            background-color: #fee2e2;
+            color: var(--danger-color);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.2em;
+            flex-shrink: 0;
         }
         .btn-icon-remove:hover { background-color: #fecaca; }
-        [data-theme="dark"] .btn-icon-remove { background-color: #452323; }
-        [data-theme="dark"] .btn-icon-remove:hover { background-color: #622d2d; }
+
+        /* Agentes Selecionados (Pills) */
         .agentes-selecionados-container { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; min-height: 48px; }
         .agente-pill {
-            background-color: #e0e6f7; color: #3f51b5; padding: 6px 12px; border-radius: 20px;
-            font-size: 0.9em; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;
+            background-color: #e0e6f7;
+            color: #3f51b5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        [data-theme="dark"] .agente-pill { background-color: #2c3e8f; color: #c7d2fe; }
         .remove-agente-btn {
-            background: #c1c9e8; color: #3f51b5; border: none; border-radius: 50%; width: 20px; height: 20px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
+            background: #c1c9e8;
+            color: #3f51b5;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
         }
         .remove-agente-btn:hover { background: #3f51b5; color: white; }
-        [data-theme="dark"] .remove-agente-btn { background: #4f64d0; color: #c7d2fe; }
-        [data-theme="dark"] .remove-agente-btn:hover { background: #c7d2fe; color: #2c3e8f; }
-        #lista-agentes-resultado {
-            max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-top: none;
-            border-radius: 0 0 8px 8px; position: absolute; background-color: var(--surface-color); z-index: 1000;
-            width: 100%; box-shadow: var(--shadow);
-        }
+        
+        #lista-agentes-resultado { max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; position: absolute; background-color: var(--surface-color); z-index: 1000; width: 100%; box-shadow: var(--shadow); }
         #lista-agentes-resultado div { padding: 12px; cursor: pointer; }
         #lista-agentes-resultado div:hover { background-color: var(--bg-color); }
-        .feedback-message, .error-message { min-height: 1.2em; font-weight: 500; }
-        .feedback-message { font-size: 0.9em; margin-top: 10px; text-align: center; }
+
+        /* Mensagens de Feedback */
+        .feedback-message { font-size: 0.9em; margin-top: 10px; text-align: center; font-weight: 500; min-height: 1.2em; }
         .feedback-message.success { color: var(--success-color); }
         .feedback-message.error { color: var(--danger-color); }
-        .error-message { color: var(--danger-color); font-size: 0.85em; margin-top: 5px; }
-        .status-message {
-            margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center;
-            display: none; border: 1px solid transparent;
-        }
+        .error-message { color: var(--danger-color); font-size: 0.85em; margin-top: 5px; font-weight: 500; }
+        .status-message { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; display: none; border: 1px solid transparent; }
         .status-message.success { background-color: #c6f6d5; color: #22543d; border-color: #9ae6b4; }
         .status-message.error { background-color: #fed7d7; color: #742a2a; border-color: #feb2b2; }
         .status-message.processing { background-color: #feebc8; color: #744210; border-color: #fbd38d; }
 
         /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-            display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0;
-            visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
         .modal-overlay.visible { opacity: 1; visibility: visible; transition: opacity 0.3s, visibility 0s 0s; }
-        .modal-content {
-            background: var(--surface-color); padding: 25px; border-radius: var(--border-radius); width: 90%;
-            max-width: 450px; box-shadow: var(--shadow-lg); transform: scale(0.9);
-            transition: transform 0.3s, background-color 0.2s;
-        }
+        .modal-content { background: var(--surface-color); padding: 25px; border-radius: var(--border-radius); width: 90%; max-width: 450px; box-shadow: var(--shadow-lg); transform: scale(0.9); transition: transform 0.3s; }
         .modal-overlay.visible .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title { font-size: 1.25em; font-weight: 600; margin: 0; }
@@ -234,31 +278,7 @@
         .hidden { display: none; }
         .grid-container { display: grid; grid-template-columns: 1fr; gap: 18px; }
 
-        /* --- BANNER DE ATUALIZAÇÃO --- */
-        .update-banner {
-            display: none; /* Começa escondido */
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--surface-color);
-            color: var(--text-color);
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            z-index: 9999;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid var(--border-color);
-        }
-        [data-theme="dark"] .update-banner {
-            background-color: #4a5568;
-            color: #f7fafc;
-        }
-        .update-banner.show {
-            display: flex;
-        }
-
+        /* MEDIA QUERIES para telas maiores */
         @media (min-width: 768px) {
             .container { padding: 32px; }
             .grid-container { grid-template-columns: repeat(2, 1fr); }
@@ -267,6 +287,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- TELA DE LOGIN -->
@@ -303,12 +324,6 @@
                 <strong id="user-email"></strong>
             </div>
             <div class="header-actions">
-                <button id="theme-toggle" title="Alterar tema">
-                    <!-- Ícone da Lua -->
-                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                    <!-- Ícone do Sol -->
-                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                </button>
                 <a id="toggle-password-form" class="password-toggle-link">Alterar Senha</a>
                 <button id="logout-button" class="btn btn-danger">Sair</button>
             </div>
@@ -321,7 +336,7 @@
                 
                 <form id="pedido-form" onsubmit="event.preventDefault();">
                     <div class="form-group"><label for="data_pedido">Data do Pedido:<span class="required-asterisk">*</span></label><input type="date" id="data_pedido" name="data_pedido" required><div id="data_pedido-error" class="error-message"></div></div>
-                    <div class="form-group"><label for="atividade">Atividade:<span class="required-asterisk">*</span></label><select id="atividade" name="atividade" required><option value="">Selecione...</option><option value="CC">CC - Controle de Criadouro</option><option value="ADL">ADL - Avaliação de Densidade Larvária</option><option value="NEB">NEB - Nebulização</option><option value="VIST">VIST - Vistoria</option><option value="ARR">ARR - Arrastão</option><option value="VIGIZOO">VIGIZOO</option><option value="OUTROS">OUTROS</option></select><div id="atividade-error" class="error-message"></div></div>
+                    <div class="form-group"><label for="atividade">Atividade:<span class="required-asterisk">*</span></label><select id="atividade" name="atividade" required><option value="">Selecione...</option><option value="CC">CC - Controle de Criadouro</option><option value="ADL">ADL - Avaliação de Densidade Larvária</option><option value="NEB">NEB - Nebulização</option><option value="VIST">VIST - Vistoria</option><option value="ARR">ARR - Arrastão</option><option value="OUTROS">OUTROS</option></select><div id="atividade-error" class="error-message"></div></div>
                     
                     <div class="form-section-title">Endereço da Atividade</div>
                     <div class="grid-container">
@@ -349,7 +364,7 @@
                     <button type="button" class="btn btn-secondary" id="btn-adicionar-material"><span>+</span> Adicionar Material</button>
                     <div id="materiais-error" class="error-message"></div> 
                     <div id="materiais-adicionados">
-                        <p class="nenhum-material-mensagem">Nenhum material adicionado.</p>
+                        <!-- Cards de material serão inseridos aqui -->
                     </div>
 
                     <div class="form-section-title">Equipe</div>
@@ -363,7 +378,7 @@
                     <div class="form-group">
                         <label for="equipe">Equipe:<span class="required-asterisk">*</span></label>
                         <select id="equipe" name="equipe" required>
-                            <option value="">Selecione...</option>
+                            <option value="">Selecione...</option><option value="CCZ-NEB1">CCZ-NEB1</option><option value="CCZ-NEB2">CCZ-NEB2</option><option value="CCZ-NEB3">CCZ-NEB3</option><option value="CCZ-NEB4">CCZ-NEB4</option><option value="SÃO JUDAS">SÃO JUDAS</option><option value="VL MARIA">VL MARIA</option><option value="VL NAIR">VL NAIR</option><option value="JD SATÉLITE">JD SATÉLITE</option>
                         </select>
                         <div id="equipe-error" class="error-message"></div>
                     </div>
@@ -385,7 +400,7 @@
                 <h3 class="modal-title">Alterar Senha</h3>
                 <button class="modal-close-btn" id="modal-close-btn">×</button>
             </div>
-            <form id="change-password-form" onsubmit="event.preventDefault();">
+            <form id="change-password-form">
                 <div class="form-group">
                     <label for="new-password">Nova Senha</label>
                     <input type="password" id="new-password" placeholder="Digite a nova senha" required>
@@ -396,21 +411,15 @@
         </div>
     </div>
 
-    <!-- HTML PARA A NOTIFICAÇÃO DE ATUALIZAÇÃO -->
-    <div id="update-notification" class="update-banner">
-        <span>Uma nova versão está disponível!</span>
-        <button id="reload-button" class="btn btn-secondary">Atualizar Agora</button>
-    </div>
 
     <script>
-        // SUAS CONFIGURAÇÕES ESPECÍFICAS FORAM MANTIDAS
         const firebaseConfig = {
-            apiKey: "AIzaSyCFdMUwG6F27c8VlHLpQy3S8cM_frvQmgU",
-            authDomain: "pwa-pedidos.firebaseapp.com",
-            projectId: "pwa-pedidos",
-            storageBucket: "pwa-pedidos.firebasestorage.app",
-            messagingSenderId: "807830113116",
-            appId: "1:807830113116:web:ce4cc262132cdbd7634f99"
+            apiKey: "AIzaSyCSSQIrxWMc9FyQTtpjENP_hhpAXIamSyw",
+            authDomain: "pwa-pedidos-seguro.firebaseapp.com",
+            projectId: "pwa-pedidos-seguro",
+            storageBucket: "pwa-pedidos-seguro.appspot.com",
+            messagingSenderId: "188774063096",
+            appId: "1:188774063096:web:51ffeac39fbcbd01e7940d"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -465,7 +474,7 @@
             auth.onAuthStateChanged(user => {
                 if (user) {
                     authWrapper.style.display = 'none';
-                    appContainer.style.display = 'block';
+                    appContainer.style.display = 'block'; // Alterado para block
                     document.getElementById('user-email').textContent = user.email;
                     initializeAppLogic(user);
                 } else {
@@ -479,24 +488,22 @@
         function initializeAppLogic(user) {
             if (window.appInitialized) return;
 
-            // --- LÓGICA DO TEMA (DARK MODE) ---
-            const themeToggle = document.getElementById('theme-toggle');
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
-
             document.getElementById('logout-button').addEventListener('click', () => auth.signOut());
             
+            // Lógica do Modal de Alterar Senha
             const passwordModal = document.getElementById('password-modal');
             const openModalBtn = document.getElementById('toggle-password-form');
             const closeModalBtn = document.getElementById('modal-close-btn');
             
-            openModalBtn.addEventListener('click', (e) => { e.preventDefault(); passwordModal.classList.add('visible'); });
+            openModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                passwordModal.classList.add('visible');
+            });
+            
             closeModalBtn.addEventListener('click', () => passwordModal.classList.remove('visible'));
-            passwordModal.addEventListener('click', (e) => { if (e.target === passwordModal) passwordModal.classList.remove('visible'); });
+            passwordModal.addEventListener('click', (e) => {
+                if (e.target === passwordModal) passwordModal.classList.remove('visible');
+            });
 
             document.getElementById('change-password-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -523,7 +530,6 @@
             const listaAgentesResultado = document.getElementById('lista-agentes-resultado');
             
             carregarAgentesDaPlanilha();
-            carregarEquipes();
 
             cepInput.addEventListener('blur', function() {
                 const cep = this.value.replace(/\D/g, '');
@@ -602,34 +608,6 @@
             
             window.appInitialized = true;
             
-            function carregarEquipes() {
-                const apiUrlEquipes = 'https://script.google.com/macros/s/AKfycbwiPYI4W4sZFiWxd5YWgD2oIPZltOw3VcTHe2ETVwsuZd_UXX-mYK4CVc8yAtC-nIKEkw/exec';
-                const equipeSelect = document.getElementById('equipe');
-                const equipeError = document.getElementById('equipe-error');
-                const placeholderOption = equipeSelect.querySelector('option[value=""]');
-
-                equipeSelect.disabled = true;
-                if (placeholderOption) placeholderOption.textContent = 'Carregando equipes...';
-
-                fetch(apiUrlEquipes)
-                    .then(response => { if (!response.ok) throw new Error(`Erro na API de Equipes: ${response.status}`); return response.json(); })
-                    .then(data => {
-                        if (data.error || !data.equipe || !Array.isArray(data.equipe)) { throw new Error('Formato de dados de equipes inesperado.'); }
-                        data.equipe.forEach(nomeEquipe => {
-                            const option = document.createElement('option');
-                            option.value = nomeEquipe;
-                            option.textContent = nomeEquipe;
-                            equipeSelect.appendChild(option);
-                        });
-                        equipeError.textContent = '';
-                    })
-                    .catch(error => { equipeError.textContent = `Falha ao carregar equipes.`; console.error('Erro ao carregar equipes:', error); })
-                    .finally(() => {
-                        equipeSelect.disabled = false;
-                        if (placeholderOption) placeholderOption.textContent = 'Selecione...';
-                    });
-            }
-
             function carregarAgentesDaPlanilha() {
                 const apiUrl = 'https://script.google.com/macros/s/AKfycbwWc0AQcE1CfZmJQgcNFDlWXX3MMr9EZ5tmh3_TIqdT5uCguz-ZmlWZcSneQzLc4nQbPQ/exec'; 
                 buscaAgenteInput.placeholder = "Carregando agentes...";
@@ -692,8 +670,7 @@
                 const opt = descSelect.options[descSelect.selectedIndex];
                 const desc = (opt.parentNode.label) ? `${opt.parentNode.label} - ${opt.text}` : opt.text;
                 const container = document.getElementById('materiais-adicionados');
-                container.querySelector('.nenhum-material-mensagem')?.remove();
-
+                // **HTML do card ATUALIZADO**
                 const cardHTML = `
                     <div class="material-card">
                         <div class="material-card-content">
@@ -708,11 +685,7 @@
             }
 
             function removerMaterialDaLista(botao) {
-                const container = document.getElementById('materiais-adicionados');
                 botao.closest('.material-card')?.remove();
-                if (container.children.length === 0) { 
-                    container.innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>'; 
-                }
             }
             
             function selecionarAgente(event) {
@@ -732,6 +705,7 @@
             }
 
             function renderizarAgentesSelecionados() {
+                // **HTML do Pill ATUALIZADO**
                 document.getElementById('agentes-selecionados-container').innerHTML = agentesSelecionados.map(agente => 
                     `<span class="agente-pill">
                         ${agente.nome}
@@ -742,36 +716,24 @@
 
             function validarFormulario() {
                 let isValid = true;
-                let firstErrorField = null;
                 document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-                const campos = [{id:'data_pedido', msg:'Data do pedido é obrigatória.'},{id:'atividade', msg:'Atividade é obrigatória.'},{id:'endereco', msg:'Endereço é obrigatório.'},{id:'numero', msg:'Número é obrigatório.'},{id:'bairro', msg:'Bairro é obrigatória.'},{id:'regiao', msg:'Região é obrigatória.'},{id:'area', msg:'Área é obrigatória.'},{id:'quadra', msg:'Quadra é obrigatória.'},{id:'equipe', msg:'Equipe é obrigatória.'}];
-                
+                const campos = [{id:'data_pedido', msg:'Data do pedido é obrigatória.'},{id:'atividade', msg:'Atividade é obrigatória.'},{id:'endereco', msg:'Endereço é obrigatório.'},{id:'numero', msg:'Número é obrigatório.'},{id:'bairro', msg:'Bairro é obrigatório.'},{id:'regiao', msg:'Região é obrigatória.'},{id:'area', msg:'Área é obrigatória.'},{id:'quadra', msg:'Quadra é obrigatória.'},{id:'equipe', msg:'Equipe é obrigatória.'}];
                 campos.forEach(c => { 
                     const field = document.getElementById(c.id);
                     if(!field.value.trim()){ 
                         document.getElementById(`${c.id}-error`).textContent = c.msg; 
-                        if (!firstErrorField) firstErrorField = field;
                         isValid = false; 
+                        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 });
-                
                 if (document.querySelectorAll('#materiais-adicionados .material-card').length === 0) { 
-                    const materialError = document.getElementById('materiais-error');
-                    materialError.textContent = 'Adicione pelo menos um material.'; 
-                    if (!firstErrorField) firstErrorField = materialError;
+                    document.getElementById('materiais-error').textContent = 'Adicione pelo menos um material.'; 
                     isValid = false; 
                 }
                 if (agentesSelecionados.length === 0) { 
-                    const agenteError = document.getElementById('agentes-error');
-                    agenteError.textContent = 'Selecione pelo menos um agente.'; 
-                    if (!firstErrorField) firstErrorField = document.getElementById('busca_agente');
+                    document.getElementById('agentes-error').textContent = 'Selecione pelo menos um agente.'; 
                     isValid = false;
                 }
-
-                if (firstErrorField) {
-                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-
                 return isValid;
             }
 
@@ -801,12 +763,13 @@
             function registrarPedido(pedidoData) {
                 const apiUrl = 'https://script.google.com/macros/s/AKfycbwY2CGGk4ydbjwvaPjU-kDsuoOzG2jif7dXRIG1tpSlrPz8XCHCdtTHTEmWQoGb4Jv-/exec';
                 const usuarioLogado = auth.currentUser;
-                const submitButton = document.getElementById('submit-button');
 
-                if (!usuarioLogado) { mostrarStatus('Erro: Usuário não autenticado. Por favor, faça login novamente.', "error"); return; }
+                if (!usuarioLogado) {
+                    mostrarStatus('Erro: Usuário não autenticado. Por favor, faça login novamente.', "error");
+                    return;
+                }
                 
-                submitButton.disabled = true;
-                submitButton.textContent = 'Enviando...';
+                document.getElementById('submit-button').disabled = true;
 
                 usuarioLogado.getIdToken()
                     .then(idToken => {
@@ -818,12 +781,15 @@
 
                         return fetch(apiUrl, { method: 'POST', body: formData });
                     })
-                    .then(response => { if (!response.ok) throw new Error('Erro de rede ou no servidor. Código: ' + response.status); return response.json(); })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Erro de rede ou no servidor. Código: ' + response.status);
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.status === "success") {
                             mostrarStatus("Pedido registrado com sucesso!", "success");
                             pedidoForm.reset();
-                            document.getElementById('materiais-adicionados').innerHTML = '<p class="nenhum-material-mensagem">Nenhum material adicionado.</p>';
+                            document.getElementById('materiais-adicionados').innerHTML = '';
                             agentesSelecionados = [];
                             renderizarAgentesSelecionados();
                             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -831,47 +797,17 @@
                             throw new Error(data.message || 'Ocorreu um erro desconhecido no servidor.');
                         }
                     })
-                    .catch(error => { mostrarStatus('Erro ao registrar pedido: ' + error.message, "error"); })
+                    .catch(error => {
+                        mostrarStatus('Erro ao registrar pedido: ' + error.message, "error");
+                    })
                     .finally(() => {
-                        submitButton.disabled = false;
-                        submitButton.textContent = 'Registrar Atividade';
+                        document.getElementById('submit-button').disabled = false;
                     });
             }
         }
     </script>
     <script>
-        // Lógica aprimorada para registro do Service Worker e notificação de atualização
-        if ('serviceWorker' in navigator) {
-            const updateNotification = document.getElementById('update-notification');
-            const reloadButton = document.getElementById('reload-button');
-            let newWorker;
-
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                reg.addEventListener('updatefound', () => {
-                    // Uma nova versão do SW foi encontrada
-                    newWorker = reg.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        // O novo SW foi instalado e está pronto para assumir
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Exibe a notificação
-                            updateNotification.classList.add('show');
-                        }
-                    });
-                });
-            }).catch(err => console.error('SW reg failed:', err));
-
-            // Ação do botão de atualizar
-            reloadButton.addEventListener('click', () => {
-                newWorker.postMessage({ action: 'SKIP_WAITING' });
-            });
-
-            // Recarrega a página uma vez que o novo SW assumiu o controle
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                window.location.reload();
-            });
-        }
-
-        // Lógica para o botão de instalação do PWA (mantida)
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); deferredPrompt = e;
