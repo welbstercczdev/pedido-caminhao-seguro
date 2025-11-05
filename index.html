@@ -82,98 +82,54 @@
         }
 
         /* --- LAYOUT PRINCIPAL --- */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .login-box {
-            background-color: var(--surface-color);
-            padding: 30px 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 400px;
-            transition: background-color 0.2s;
+            background-color: var(--surface-color); padding: 30px 25px; border-radius: var(--border-radius);
+            box-shadow: var(--shadow); width: 100%; max-width: 400px; transition: background-color 0.2s;
         }
-        
         .app-wrapper { padding-bottom: 100px; }
         .container { padding: 16px; max-width: 800px; margin: 0 auto; }
 
         /* --- CABEÇALHO DO APP --- */
         .app-header {
-            background-color: var(--surface-color);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: background-color 0.2s, border-color 0.2s;
+            background-color: var(--surface-color); padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            position: sticky; top: 0; z-index: 100; transition: background-color 0.2s, border-color 0.2s;
         }
         .user-info span { font-size: 0.9em; color: var(--text-color-light); }
         .user-info strong { color: var(--text-color); word-break: break-all; }
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .password-toggle-link {
-            font-size: 0.9em;
-            color: var(--primary-color);
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 500;
+            font-size: 0.9em; color: var(--primary-color); cursor: pointer;
+            text-decoration: none; font-weight: 500;
         }
 
         /* --- TÍTULOS E SEÇÕES --- */
         h1, h2 { text-align: center; color: var(--text-color); margin-bottom: 24px; }
         h1 { margin: 24px 0; font-size: 1.8em; }
         .form-section-title {
-            font-size: 1.25em;
-            font-weight: 600;
-            color: var(--text-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 8px;
-            margin-top: 32px;
-            margin-bottom: 20px;
+            font-size: 1.25em; font-weight: 600; color: var(--text-color); border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px; margin-top: 32px; margin-bottom: 20px;
         }
 
         /* --- FORMULÁRIOS --- */
         .form-group { margin-bottom: 18px; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-color-light);
-            font-weight: 500;
-            font-size: 0.9em;
-        }
+        label { display: block; margin-bottom: 8px; color: var(--text-color-light); font-weight: 500; font-size: 0.9em; }
         select, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input[type="password"], textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-            background-color: var(--surface-color);
-            color: var(--text-color); /* Garante que o texto do input seja legível */
+            width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px;
+            box-sizing: border-box; font-size: 16px; background-color: var(--surface-color); color: var(--text-color);
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
         select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
         }
         .required-asterisk { color: var(--danger-color); margin-left: 2px; }
         small { color: var(--text-color-light); font-size: 0.8em; margin-top: 4px; display: block;}
 
         /* --- BOTÕES --- */
         .btn {
-            display: inline-flex; alignItems: center; justify-content: center;
-            gap: 8px; padding: 12px 20px; border: none; border-radius: 8px;
-            cursor: pointer; font-size: 16px; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;
             transition: all 0.2s ease; text-decoration: none;
         }
         .btn:hover { transform: translateY(-1px); }
@@ -189,19 +145,10 @@
 
         /* --- BOTÃO DE TEMA (DARK MODE) --- */
         #theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            color: var(--text-color); /* O SVG herda essa cor */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s, transform 0.2s;
+            background: none; border: none; cursor: pointer; padding: 5px; color: var(--text-color);
+            display: flex; align-items: center; justify-content: center; transition: color 0.2s, transform 0.2s;
         }
-        #theme-toggle:hover {
-            transform: scale(1.1); /* Efeito suave ao passar o mouse */
-        }
+        #theme-toggle:hover { transform: scale(1.1); }
         #theme-toggle .icon-sun { display: none; }
         [data-theme="dark"] #theme-toggle .icon-moon { display: none; }
         [data-theme="dark"] #theme-toggle .icon-sun { display: block; }
@@ -210,21 +157,17 @@
         .sticky-footer {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: linear-gradient(to top, var(--surface-color), hsla(0, 0%, 100%, 0.9));
-            padding: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            border-top: 1px solid var(--border-color); z-index: 100;
-            transition: background-color 0.2s, border-color 0.2s;
+            padding: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid var(--border-color);
+            z-index: 100; transition: background-color 0.2s, border-color 0.2s;
         }
-        [data-theme="dark"] .sticky-footer {
-            background: linear-gradient(to top, var(--surface-color), rgba(45, 55, 72, 0.9));
-        }
+        [data-theme="dark"] .sticky-footer { background: linear-gradient(to top, var(--surface-color), rgba(45, 55, 72, 0.9)); }
         
         /* --- COMPONENTES ESPECÍFICOS --- */
         #materiais-adicionados { margin-top: 20px; display: grid; gap: 12px; }
         .nenhum-material-mensagem { text-align: center; color: var(--text-color-light); padding: 20px; border: 2px dashed var(--border-color); border-radius: var(--border-radius); background-color: var(--surface-color); }
         .material-card {
-            background-color: var(--surface-color); border: 1px solid var(--border-color);
-            border-radius: var(--border-radius); padding: 16px; display: flex;
-            align-items: center; justify-content: space-between; gap: 15px;
+            background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius);
+            padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 15px;
             box-shadow: var(--shadow); transition: background-color 0.2s, border-color 0.2s;
         }
         .material-card-content { flex-grow: 1; }
@@ -232,49 +175,57 @@
         .material-card-qtd { font-size: 0.9em; color: var(--text-color-light); }
         .material-card-qtd strong { color: var(--primary-color); }
         .btn-icon-remove {
-            background-color: #fee2e2; color: var(--danger-color);
-            width: 40px; height: 40px; padding: 0; border-radius: 50%;
-            font-size: 1.2em; flex-shrink: 0;
+            background-color: #fee2e2; color: var(--danger-color); width: 40px; height: 40px; padding: 0;
+            border-radius: 50%; font-size: 1.2em; flex-shrink: 0;
         }
         .btn-icon-remove:hover { background-color: #fecaca; }
         [data-theme="dark"] .btn-icon-remove { background-color: #452323; }
         [data-theme="dark"] .btn-icon-remove:hover { background-color: #622d2d; }
-
         .agentes-selecionados-container { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; min-height: 48px; }
         .agente-pill {
-            background-color: #e0e6f7; color: #3f51b5; padding: 6px 12px;
-            border-radius: 20px; font-size: 0.9em; font-weight: 500;
-            display: inline-flex; align-items: center; gap: 8px;
+            background-color: #e0e6f7; color: #3f51b5; padding: 6px 12px; border-radius: 20px;
+            font-size: 0.9em; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;
         }
         [data-theme="dark"] .agente-pill { background-color: #2c3e8f; color: #c7d2fe; }
         .remove-agente-btn {
-            background: #c1c9e8; color: #3f51b5; border: none; border-radius: 50%;
-            width: 20px; height: 20px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; font-weight: bold;
+            background: #c1c9e8; color: #3f51b5; border: none; border-radius: 50%; width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;
         }
         .remove-agente-btn:hover { background: #3f51b5; color: white; }
         [data-theme="dark"] .remove-agente-btn { background: #4f64d0; color: #c7d2fe; }
         [data-theme="dark"] .remove-agente-btn:hover { background: #c7d2fe; color: #2c3e8f; }
-        
-        #lista-agentes-resultado { max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; position: absolute; background-color: var(--surface-color); z-index: 1000; width: 100%; box-shadow: var(--shadow); }
+        #lista-agentes-resultado {
+            max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-top: none;
+            border-radius: 0 0 8px 8px; position: absolute; background-color: var(--surface-color); z-index: 1000;
+            width: 100%; box-shadow: var(--shadow);
+        }
         #lista-agentes-resultado div { padding: 12px; cursor: pointer; }
         #lista-agentes-resultado div:hover { background-color: var(--bg-color); }
-
         .feedback-message, .error-message { min-height: 1.2em; font-weight: 500; }
         .feedback-message { font-size: 0.9em; margin-top: 10px; text-align: center; }
         .feedback-message.success { color: var(--success-color); }
         .feedback-message.error { color: var(--danger-color); }
         .error-message { color: var(--danger-color); font-size: 0.85em; margin-top: 5px; }
-        
-        .status-message { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; display: none; border: 1px solid transparent; }
+        .status-message {
+            margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center;
+            display: none; border: 1px solid transparent;
+        }
         .status-message.success { background-color: #c6f6d5; color: #22543d; border-color: #9ae6b4; }
         .status-message.error { background-color: #fed7d7; color: #742a2a; border-color: #feb2b2; }
         .status-message.processing { background-color: #feebc8; color: #744210; border-color: #fbd38d; }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0;
+            visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s;
+        }
         .modal-overlay.visible { opacity: 1; visibility: visible; transition: opacity 0.3s, visibility 0s 0s; }
-        .modal-content { background: var(--surface-color); padding: 25px; border-radius: var(--border-radius); width: 90%; max-width: 450px; box-shadow: var(--shadow-lg); transform: scale(0.9); transition: transform 0.3s, background-color 0.2s; }
+        .modal-content {
+            background: var(--surface-color); padding: 25px; border-radius: var(--border-radius); width: 90%;
+            max-width: 450px; box-shadow: var(--shadow-lg); transform: scale(0.9);
+            transition: transform 0.3s, background-color 0.2s;
+        }
         .modal-overlay.visible .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title { font-size: 1.25em; font-weight: 600; margin: 0; }
@@ -282,6 +233,31 @@
         
         .hidden { display: none; }
         .grid-container { display: grid; grid-template-columns: 1fr; gap: 18px; }
+
+        /* --- BANNER DE ATUALIZAÇÃO --- */
+        .update-banner {
+            display: none; /* Começa escondido */
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--border-color);
+        }
+        [data-theme="dark"] .update-banner {
+            background-color: #4a5568;
+            color: #f7fafc;
+        }
+        .update-banner.show {
+            display: flex;
+        }
 
         @media (min-width: 768px) {
             .container { padding: 32px; }
@@ -291,7 +267,6 @@
         }
     </style>
 </head>
-
 <body>
 
     <!-- TELA DE LOGIN -->
@@ -421,6 +396,11 @@
         </div>
     </div>
 
+    <!-- HTML PARA A NOTIFICAÇÃO DE ATUALIZAÇÃO -->
+    <div id="update-notification" class="update-banner">
+        <span>Uma nova versão está disponível!</span>
+        <button id="reload-button" class="btn btn-secondary">Atualizar Agora</button>
+    </div>
 
     <script>
         // SUAS CONFIGURAÇÕES ESPECÍFICAS FORAM MANTIDAS
@@ -860,7 +840,38 @@
         }
     </script>
     <script>
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error('SW reg failed:', err)); }); }
+        // Lógica aprimorada para registro do Service Worker e notificação de atualização
+        if ('serviceWorker' in navigator) {
+            const updateNotification = document.getElementById('update-notification');
+            const reloadButton = document.getElementById('reload-button');
+            let newWorker;
+
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                reg.addEventListener('updatefound', () => {
+                    // Uma nova versão do SW foi encontrada
+                    newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        // O novo SW foi instalado e está pronto para assumir
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Exibe a notificação
+                            updateNotification.classList.add('show');
+                        }
+                    });
+                });
+            }).catch(err => console.error('SW reg failed:', err));
+
+            // Ação do botão de atualizar
+            reloadButton.addEventListener('click', () => {
+                newWorker.postMessage({ action: 'SKIP_WAITING' });
+            });
+
+            // Recarrega a página uma vez que o novo SW assumiu o controle
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        }
+
+        // Lógica para o botão de instalação do PWA (mantida)
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); deferredPrompt = e;
