@@ -374,7 +374,7 @@
         </div>
         
         <div class="sticky-footer">
-            <button type="submit" id="submit-button" form="pedido-form" class="btn btn-primary btn-full-width">Enviar Pedido</button>
+            <button type="submit" id="submit-button" form="pedido-form" class="btn btn-primary btn-full-width">Enviar</button>
         </div>
     </div>
     
@@ -844,7 +844,7 @@
             const reloadButton = document.getElementById('reload-button');
             let newWorker;
 
-            navigator.serviceWorker.register('sw.js?v=13').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=14').then(reg => {
                 reg.addEventListener('updatefound', () => {
                     newWorker = reg.installing;
                     newWorker.addEventListener('statechange', () => {
