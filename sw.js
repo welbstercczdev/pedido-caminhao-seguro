@@ -1,8 +1,6 @@
-// sw.js - VERSÃO FINAL E CORRIGIDA
-const CACHE_NAME = 'pedido-caminhao-cache-v8'; // Versão incrementada para forçar a atualização
+// sw.js - VERSÃO v9 - ATUALIZADO PARA NOTIFICAÇÃO
+const CACHE_NAME = 'pedido-caminhao-cache-v9'; // Versão incrementada
 
-// Lista de arquivos essenciais para o App Shell.
-// Garanta que todos esses arquivos existem nos caminhos corretos.
 const urlsToCache = [
   './',
   'index.html',
@@ -12,7 +10,7 @@ const urlsToCache = [
   'icons/icon-512x512.png'
 ];
 
-// Evento de instalação: baixa e armazena os assets do App Shell.
+// Evento de instalação: baixa e armazena os assets.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +18,6 @@ self.addEventListener('install', event => {
         console.log('[Service Worker] Cache aberto, adicionando App Shell.');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting()) // Força o novo SW a se tornar ativo imediatamente.
       .catch(error => {
         console.error('[Service Worker] Falha ao cachear arquivos durante a instalação:', error);
       })
@@ -38,31 +35,30 @@ self.addEventListener('activate', event => {
           return caches.delete(cacheName);
         }
       })
-    )).then(() => self.clients.claim()) // Torna-se o SW controlador para todas as abas abertas.
+    )).then(() => self.clients.claim())
   );
+});
+
+// NOVO: Ouve mensagens da página principal.
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Evento de fetch: intercepta requisições de rede.
 self.addEventListener('fetch', event => {
   const url = event.request.url;
 
-  // CORREÇÃO CRÍTICA: Verifica a string da URL de forma segura.
-  // Se a URL for para uma das nossas APIs, ignora o cache e vai direto para a rede.
   if (url.startsWith('https://script.google.com/') || url.startsWith('https://viacep.com.br/')) {
-    // Não faz nada, deixa o navegador lidar com a requisição de rede normalmente.
-    return;
+    return; // Vai direto para a rede.
   }
 
-  // Para todas as outras requisições, usa a estratégia "Cache-First".
+  // Estratégia "Cache-First" para os outros assets.
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Se a resposta estiver no cache, retorna ela.
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Se não estiver no cache, busca na rede.
-        return fetch(event.request);
+        return cachedResponse || fetch(event.request);
       })
   );
 });
