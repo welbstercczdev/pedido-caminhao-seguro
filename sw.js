@@ -1,5 +1,5 @@
 // sw.js - VERSÃO v9 - ATUALIZADO PARA NOTIFICAÇÃO
-const CACHE_NAME = 'pedido-caminhao-cache-v9'; // Versão incrementada
+const CACHE_NAME = 'pedido-caminhao-cache-v10'; // Versão incrementada
 
 const urlsToCache = [
   './',
