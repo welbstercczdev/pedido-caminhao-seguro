@@ -41,8 +41,8 @@
     <style>
         /* --- VARIAVEIS GLOBAIS DE TEMA (MODO CLARO - PADRÃO) --- */
         :root {
-            --primary-color: #007AFF;
-            --primary-color-dark: #005bb5;
+            --primary-color: #10b981; /* Verde Esmeralda para o teste */
+            --primary-color-dark: #059669; /* Verde mais escuro para o hover */
             --danger-color: #e53e3e;
             --danger-color-dark: #c53030;
             --success-color: #38a169;
@@ -121,7 +121,7 @@
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
         select:focus, input:focus, textarea:focus {
-            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
         }
         .required-asterisk { color: var(--danger-color); margin-left: 2px; }
         small { color: var(--text-color-light); font-size: 0.8em; margin-top: 4px; display: block;}
@@ -374,7 +374,7 @@
         </div>
         
         <div class="sticky-footer">
-            <button type="submit" id="submit-button" form="pedido-form" class="btn btn-primary btn-full-width">Registrar Atividade</button>
+            <button type="submit" id="submit-button" form="pedido-form" class="btn btn-primary btn-full-width">Enviar Pedido</button>
         </div>
     </div>
     
@@ -401,7 +401,6 @@
         <span>Uma nova versão está disponível!</span>
         <button id="reload-button" class="btn btn-secondary">Atualizar Agora</button>
     </div>
-
     <script>
         // SUAS CONFIGURAÇÕES ESPECÍFICAS FORAM MANTIDAS
         const firebaseConfig = {
@@ -479,7 +478,6 @@
         function initializeAppLogic(user) {
             if (window.appInitialized) return;
 
-            // --- LÓGICA DO TEMA (DARK MODE) ---
             const themeToggle = document.getElementById('theme-toggle');
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -834,7 +832,7 @@
                     .catch(error => { mostrarStatus('Erro ao registrar pedido: ' + error.message, "error"); })
                     .finally(() => {
                         submitButton.disabled = false;
-                        submitButton.textContent = 'Registrar Atividade';
+                        submitButton.textContent = 'Enviar Pedido';
                     });
             }
         }
@@ -846,26 +844,21 @@
             const reloadButton = document.getElementById('reload-button');
             let newWorker;
 
-            navigator.serviceWorker.register('sw.js?v=11').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=12').then(reg => {
                 reg.addEventListener('updatefound', () => {
-                    // Uma nova versão do SW foi encontrada
                     newWorker = reg.installing;
                     newWorker.addEventListener('statechange', () => {
-                        // O novo SW foi instalado e está pronto para assumir
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Exibe a notificação
                             updateNotification.classList.add('show');
                         }
                     });
                 });
             }).catch(err => console.error('SW reg failed:', err));
 
-            // Ação do botão de atualizar
             reloadButton.addEventListener('click', () => {
                 newWorker.postMessage({ action: 'SKIP_WAITING' });
             });
 
-            // Recarrega a página uma vez que o novo SW assumiu o controle
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 window.location.reload();
             });
