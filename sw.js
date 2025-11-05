@@ -1,5 +1,5 @@
 // sw.js - VERSÃO v11 - ESTRATÉGIA NETWORK-FIRST PARA A PÁGINA
-const CACHE_NAME = 'pedido-caminhao-cache-v13'; // << INCREMENTE A VERSÃO!
+const CACHE_NAME = 'pedido-caminhao-cache-v14'; // << INCREMENTE A VERSÃO!
 
 const urlsToCache = [
   './',
