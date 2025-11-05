@@ -1,5 +1,5 @@
-// sw.js - VERSÃO v9 - ATUALIZADO PARA NOTIFICAÇÃO
-const CACHE_NAME = 'pedido-caminhao-cache-v10'; // Versão incrementada
+// sw.js - VERSÃO v11 - ESTRATÉGIA NETWORK-FIRST PARA A PÁGINA
+const CACHE_NAME = 'pedido-caminhao-cache-v11'; // << INCREMENTE A VERSÃO!
 
 const urlsToCache = [
   './',
@@ -10,7 +10,6 @@ const urlsToCache = [
   'icons/icon-512x512.png'
 ];
 
-// Evento de instalação: baixa e armazena os assets.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -18,13 +17,9 @@ self.addEventListener('install', event => {
         console.log('[Service Worker] Cache aberto, adicionando App Shell.');
         return cache.addAll(urlsToCache);
       })
-      .catch(error => {
-        console.error('[Service Worker] Falha ao cachear arquivos durante a instalação:', error);
-      })
   );
 });
 
-// Evento de ativação: limpa caches antigos.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -39,22 +34,42 @@ self.addEventListener('activate', event => {
   );
 });
 
-// NOVO: Ouve mensagens da página principal.
 self.addEventListener('message', event => {
   if (event.data && event.data.action === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
 
-// Evento de fetch: intercepta requisições de rede.
+// MUDANÇA CRÍTICA AQUI: NOVA LÓGICA DE FETCH
 self.addEventListener('fetch', event => {
-  const url = event.request.url;
-
-  if (url.startsWith('https://script.google.com/') || url.startsWith('https://viacep.com.br/')) {
-    return; // Vai direto para a rede.
+  // Ignora APIs externas, como antes
+  if (event.request.url.startsWith('https://script.google.com/') || event.request.url.startsWith('https://viacep.com.br/')) {
+    return;
   }
 
-  // Estratégia "Cache-First" para os outros assets.
+  // ESTRATÉGIA "NETWORK-FIRST" para a navegação principal (para o index.html)
+  // Isso garante que o usuário sempre receba o HTML mais recente se estiver online.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Se a rede funcionar, clona a resposta, armazena no cache e retorna.
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+          return response;
+        })
+        .catch(() => {
+          // Se a rede falhar, busca a página principal do cache.
+          return caches.match('index.html');
+        })
+    );
+    return;
+  }
+
+  // ESTRATÉGIA "CACHE-FIRST" para todos os outros arquivos (ícones, manifest, etc.)
+  // Eles não mudam com frequência, então é mais rápido servir do cache.
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
