@@ -41,8 +41,8 @@
     <style>
         /* --- VARIAVEIS GLOBAIS DE TEMA (MODO CLARO - PADRÃO) --- */
         :root {
-            --primary-color: #10b981; /* Verde Esmeralda para o teste */
-            --primary-color-dark: #059669; /* Verde mais escuro para o hover */
+            --primary-color: #007AFF; /* Verde Esmeralda para o teste */
+            --primary-color-dark: #005bb5; /* Verde mais escuro para o hover */
             --danger-color: #e53e3e;
             --danger-color-dark: #c53030;
             --success-color: #38a169;
@@ -844,7 +844,7 @@
             const reloadButton = document.getElementById('reload-button');
             let newWorker;
 
-            navigator.serviceWorker.register('sw.js?v=12').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=13').then(reg => {
                 reg.addEventListener('updatefound', () => {
                     newWorker = reg.installing;
                     newWorker.addEventListener('statechange', () => {
