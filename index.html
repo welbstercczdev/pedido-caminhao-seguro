@@ -846,7 +846,7 @@
             const reloadButton = document.getElementById('reload-button');
             let newWorker;
 
-            navigator.serviceWorker.register('sw.js').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=10').then(reg => {
                 reg.addEventListener('updatefound', () => {
                     // Uma nova versão do SW foi encontrada
                     newWorker = reg.installing;
